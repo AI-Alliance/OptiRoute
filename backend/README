@@ -1,9 +1,7 @@
 # FLASK SERVER
 
 ## Run the server
-
-
-flask --app main run
+flask run
 
 ### Run with debug (automatically reload)
-flask --app main run --debug
+flask run --debug
