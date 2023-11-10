@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from logic import Task, Result
+from logic import Task, Solution
 
 
 class Algorithm(ABC):
@@ -8,5 +8,5 @@ class Algorithm(ABC):
         pass
 
     @abstractmethod
-    def solve(self, task: Task) -> Result:
+    def solve(self, task: Task) -> Solution:
         pass
