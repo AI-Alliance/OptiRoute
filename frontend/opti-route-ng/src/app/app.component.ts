@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { environment } from '../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, map, of } from 'rxjs';
-import { MapInfoWindow, MapMarker } from '@angular/google-maps';
+import { MapInfoWindow, MapMarker, MapGeocoder } from '@angular/google-maps';
 import { ClientMarker } from './models/ClientMarker';
 @Component({
   selector: 'app-root',
@@ -24,11 +24,13 @@ export class AppComponent implements OnInit {
 
   markerOptions: google.maps.MarkerOptions = {draggable: false};
   clientMarkers: ClientMarker[] = [];
-  constructor(httpClient: HttpClient){
-    this.apiLoaded = httpClient.jsonp('https://maps.googleapis.com/maps/api/js?key=' + environment.gMapsApiKey, 'callback').pipe(
-      map(() => {
-        return true;
-      }),
+
+  lastMatrix: google.maps.DistanceMatrixResponse | undefined;
+
+  private distanceMatrixService: google.maps.DistanceMatrixService | undefined;
+  constructor(private httpClient: HttpClient, private geocoder: MapGeocoder){
+    this.apiLoaded = this.httpClient.jsonp('https://maps.googleapis.com/maps/api/js?key=' + environment.gMapsApiKey, 'callback').pipe(
+      map(() => {this.onApiLoaded(); return true}),
       catchError((error) => {
         console.error(error);
         return of(false);
@@ -36,9 +38,40 @@ export class AppComponent implements OnInit {
     );
   }
 
-  ngOnInit(): void {
+
+
+  onApiLoaded(){
+    this.distanceMatrixService = new google.maps.DistanceMatrixService();
     
+  }
+
+  ngOnInit(): void {
+   
   
+  }
+
+  getDistanceMatrix(){
+    this.distanceMatrixService?.getDistanceMatrix(
+      {
+        origins: this.clientMarkers.map(m => m.latLng),
+        destinations: this.clientMarkers.map(m => m.latLng),
+        travelMode: google.maps.TravelMode.DRIVING
+      },
+      (response) => {
+        console.log(response); 
+        if(response){
+          this.lastMatrix = response;
+        }
+      }
+    )
+  }
+
+  getGeoInfo(marker: ClientMarker){
+    this.geocoder.geocode({
+      location: marker.latLng
+    }).subscribe(({results}) => {
+      console.log(results);
+    });
   }
 
   addMarker(event: google.maps.MapMouseEvent) {
