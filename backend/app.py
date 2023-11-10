@@ -18,7 +18,7 @@ def welcome_page():
     return "<p>Welcome To VRP server</p>"
 
 
-@app.route("/submit", methods=['POST'])
+@app.route("/tasks", methods=['POST'])
 def submit_task():
     request_dict = request.json
     task = RequestToTaskConverter.convert(request_dict)
