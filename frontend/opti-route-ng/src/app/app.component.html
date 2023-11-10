@@ -1,0 +1,11 @@
+
+<div class="my-google-map" *ngIf="apiLoaded | async">
+  <google-map  height="100%" width="100%" [options]="options" (mapClick)="addMarker($event)">
+    
+    <map-marker *ngFor="let clientMarker of clientMarkers"  [position]="clientMarker.latLng" [options]="markerOptions" #marker="mapMarker" (mapMouseover)="openInfoWindow(clientMarker, marker)" ></map-marker>
+    <map-info-window>
+      {{lastMarker?.uuid}}
+      <button *ngIf="lastMarker" (click)="deleteMarker(lastMarker)" class="btn btn-danger">Delete marker</button>
+    </map-info-window>
+  </google-map>
+</div>
