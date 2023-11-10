@@ -1,8 +1,10 @@
 from flask import Flask
+from flask import request
+
 from logic import Task
+from logic import RequestToTaskConverter
 
 app = Flask(__name__)
-
 
 @app.route("/")
 def hello_world():
@@ -10,6 +12,8 @@ def hello_world():
     return "<p>Welcome To VRP server</p>"
 
 
-@app.route("/submit")
+@app.route("/submit", methods=['POST'])
 def submit_task():
-    return "You wanna submit task?"
+    request_dict = request.json
+    RequestToTaskConverter.convert(request_dict)
+    return ""
