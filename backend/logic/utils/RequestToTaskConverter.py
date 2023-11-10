@@ -9,11 +9,15 @@ class RequestToTaskConverter:
         clients_number = request_dict['clientsNumber']
         vehicles_number = request_dict['vehiclesNumber']
         rows_list: list = request_dict['rows']
+        clients_demand: list = request_dict['clientsDemand']
+        vehicles_capacity: list = request_dict['vehiclesCapacity']
         distance_matrix = RequestToTaskConverter.rows_list_to_distance_matrix(rows_list, clients_number)
         task = TaskBuilder() \
             .set_clients_number(clients_number) \
             .set_vehicles_number(vehicles_number) \
             .set_distance_matrix(distance_matrix) \
+            .set_clients_demand(clients_demand)\
+            .set_vehicles_capacity(vehicles_capacity)\
             .get_task()
         print("Request was converted.")
         return task
