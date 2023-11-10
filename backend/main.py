@@ -10,12 +10,11 @@ from services.SolutionService import SolutionService
 
 app = Flask(__name__)
 
-taskService = TaskService()
 solutionService = SolutionService()
+taskService = TaskService(solutionService)
 
 @app.route("/")
 def welcome_page():
-    task = Task()
     return "<p>Welcome To VRP server</p>"
 
 

@@ -7,5 +7,5 @@ class GreedyAlgorithm(Algorithm):
 
     def solve(self, task: Task) -> Solution:
         print("Problem Solved!")
-        result = Solution()
+        result = Solution(task_id=task.id)
         return result

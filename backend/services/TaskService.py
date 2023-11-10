@@ -8,8 +8,8 @@ from services.SolutionService import SolutionService
 
 class TaskService(Service):
 
-    def __init__(self):
-        self.solution_service = SolutionService()
+    def __init__(self, solution_service: SolutionService):
+        self.solution_service = solution_service
         self.tasks: list[Task] = []
         self.algorithm_manager = AlgorithmManager(algorithm=GreedyAlgorithm())
 
