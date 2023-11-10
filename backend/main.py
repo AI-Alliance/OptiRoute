@@ -6,10 +6,13 @@ from logic import Task
 from logic import RequestToTaskConverter
 from logic import GreedyAlgorithm
 from services import TaskService
+from services.SolutionService import SolutionService
 
 app = Flask(__name__)
 
 taskService = TaskService()
+solutionService = SolutionService()
+
 @app.route("/")
 def welcome_page():
     task = Task()
@@ -21,25 +24,18 @@ def submit_task():
     request_dict = request.json
     task = RequestToTaskConverter.convert(request_dict)
     taskService.add(task)
-    algorithm = GreedyAlgorithm()
-
-    result = algorithm.solve(task)
     return ""
+
+
 @app.route("/tasks", methods=['GET'])
 def get_all_tasks():
     return jsonify({
         "tasks": list(map(lambda t: t.to_dict(), taskService.get_all()))
     })
 
+
 @app.route("/solutions", methods=['GET'])
 def get_solutions():
     return jsonify({
-        "results": [
-            {
-                "result_id": 0,
-            },
-            {
-                "result_id": 2,
-            }
-        ]
+        "solutions": list(map(lambda t: t.to_dict(), solutionService.get_all()))
     })
