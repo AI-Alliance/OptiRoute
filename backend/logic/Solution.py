@@ -31,7 +31,8 @@ class Solution:
         for vehicle_id, places_id_list in vehicles_to_places_dict.items():
             vehicle_route_dict = dict()
             vehicle_route_dict["vehicle_id"] = vehicle_id
-            vehicle_route_dict["route"] = [self.get_place_by_id(place_id).to_dict() for place_id in places_id_list]
+            vehicle_route_dict["route"] = [self.get_place_by_id(place_id).to_dict()
+                                             for place_id in places_id_list]
             dicts_list.append(vehicle_route_dict)
         return dicts_list
 
