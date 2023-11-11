@@ -32,4 +32,4 @@ class Place(Model):
                     "place_id": self._place_id,
                     "place_index": self._place_index,
                     "demand": self._demand
-                },
+                }
