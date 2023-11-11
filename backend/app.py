@@ -4,7 +4,7 @@ from flask import jsonify
 
 from logic import Task
 from logic import RequestToTaskConverter
-from logic import GreedyAlgorithm
+from logic import RandomAlgorithm
 from services import TaskService
 from services.SolutionService import SolutionService
 
