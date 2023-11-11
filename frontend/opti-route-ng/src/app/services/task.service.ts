@@ -5,6 +5,7 @@ import { Vehicle } from '../models/Vehicle';
 import { PlaceMarker } from '../models/PlaceMarker';
 import { v4 as uuidv4 } from 'uuid';
 import { Observable } from 'rxjs';
+import { Solution } from '../models/Solution';
 
 @Injectable({
   providedIn: 'root'
@@ -18,9 +19,9 @@ export class TaskService {
   getSolution(taskId: string){
 
 
-    return new Observable((observer) => {
+    return new Observable<Solution>((observer) => {
       const handler = setInterval(() => 
-        this.httpClient.get(environment.backendAddress + '/solutions/'+taskId).subscribe((response) => {
+        this.httpClient.get<Solution>(environment.backendAddress + '/solutions/'+taskId).subscribe((response: Solution) => {
           clearInterval(handler);
           observer.next(response);
           observer.complete();

@@ -15,7 +15,15 @@
       </li>
     </ul>
     
-    <div class="h2">Vehicles:</div>
+    <div class="h2">Vehicles: 
+      <button class="btn btn-secondary" (click)="addVehicle()">
+        +
+      </button>
+      <button class="btn btn-secondary" (click)="popVehicle()">
+        -
+      </button>
+    </div>
+    
     <ul class="list-group"*ngFor="let vehicle of vehicles">
       <li class="list-group-item">
         <div class="form-group row" >
@@ -29,11 +37,9 @@
       </li>
     </ul>
     
-    <button class="btn btn-secondary" (click)="addVehicle()">
-      Add vehicle
-    </button>
+    
     <button class="btn btn-danger" (click)="sendTask()">Send Task</button>
-    <button class="btn btn-warning" (click)="loadRoute()">Load Route</button>
+    <!-- <button class="btn btn-warning" (click)="loadRoute()">Load Route</button> -->
 
   </div>
   <div class="col" *ngIf="gMapsService.apiLoaded| async">
@@ -55,8 +61,8 @@
         <button *ngIf="lastMarker" (click)="deleteMarker(lastMarker)" class="btn btn-sm btn-danger">Delete marker</button>
         <button *ngIf="lastMarker" (click)="getGeoInfo(lastMarker)" class="btn btn-sm btn-info">Info</button>
       </map-info-window>
-      <ng-container *ngFor="let dr$ of directionsResults ">
-        <map-directions-renderer *ngIf="dr$ | async as dr" [directions]="dr" [options]="directionsRendererOptions"></map-directions-renderer>
+      <ng-container *ngFor="let dr$ of directionsResults; index as i ">
+        <map-directions-renderer *ngIf="dr$ | async as dr" [directions]="dr" [options]="directionsRendererOptions[i]"></map-directions-renderer>
       </ng-container>
     </google-map>
     

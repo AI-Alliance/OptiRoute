@@ -1,6 +1,14 @@
-version: '3'
+version: '3.7'
 
 services:
+  frontend:
+    container_name: frontend
+    build:
+      context: frontend/opti-route-ng
+    ports:
+      - "4200:80"
+    networks:
+      - mynetwork
   backend:
     container_name: backend
     build: backend

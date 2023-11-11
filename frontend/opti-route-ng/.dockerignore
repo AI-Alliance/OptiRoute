@@ -1,0 +1,24 @@
+# Node.js dependencies
+node_modules/
+npm-debug.log
+
+# Angular build artifacts
+dist/
+.angular/
+# Ignore any .git directory
+.git/
+
+# Editor folders and files
+.vscode/
+.idea/
+*.suo
+*.user
+*.userprefs
+*.log
+
+# Other unnecessary files
+*.md
+Dockerfile
+.dockerignore
+README.md
+LICENSE

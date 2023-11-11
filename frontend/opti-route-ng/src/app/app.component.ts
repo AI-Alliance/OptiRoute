@@ -1,13 +1,14 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { environment } from '../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, map, of } from 'rxjs';
-import { MapInfoWindow, MapMarker, MapGeocoder, MapDirectionsService } from '@angular/google-maps';
+import { Observable, catchError, forkJoin, map, of } from 'rxjs';
+import { MapInfoWindow, MapMarker, MapGeocoder, MapDirectionsService, MapGeocoderResponse } from '@angular/google-maps';
 import { PlaceMarker, PlaceType } from './models/PlaceMarker';
 import { Vehicle } from './models/Vehicle';
 import { TaskService } from './services/task.service';
 import { GMapsService } from './services/g-maps.service';
 import { v4 as uuidv4 } from 'uuid';
+import { Solution } from './models/Solution';
 
 
 
@@ -43,11 +44,41 @@ export class AppComponent implements OnInit {
 
 
   directionsResults: Observable<google.maps.DirectionsResult | undefined>[] = [];
-  directionsRendererOptions: google.maps.DirectionsRendererOptions = {polylineOptions: {strokeColor: 'green'}};
-  loadRoute(){
+  directionsRendererOptions: google.maps.DirectionsRendererOptions[] = []; 
+  loadRoute(placesId:string[], color: string){
     
-    this.directionsResults.push(this.gMapsService.loadRoute(this.placeMarkers));
-    
+    let placesLatLng: google.maps.LatLng[] = [];
+    let observers: Observable<MapGeocoderResponse>[] = []
+    for (const placeId of placesId) {
+
+      observers.push(
+        this.gMapsService.getGeoInfoById(placeId)
+      )
+      this.gMapsService.getGeoInfoById(placeId).subscribe((r) => {
+        placesLatLng.push(r.results[0].geometry.location);
+      })
+    }
+    forkJoin(observers).subscribe((responses) => {
+      responses.forEach((r) => {
+        placesLatLng.push(r.results[0].geometry.location);
+      })  
+      this.directionsResults.push(this.gMapsService.loadRoute(placesLatLng));
+      this.directionsRendererOptions.push({markerOptions:{visible: false}, polylineOptions: {strokeColor: color, strokeOpacity: 0.5}});
+    })
+  }
+
+  clearRoutes(){
+    this.directionsRendererOptions = [];
+    this.directionsResults = [];
+  }
+
+  showSolution(solution: Solution){
+    let colors = ['red', 'green', 'yellow', 'purple'];
+
+    this.clearRoutes();
+    for (const vehicle of solution.vehicles) {
+      this.loadRoute(vehicle.route.map((p)=> p.place_id), colors.pop() ?? 'black');
+    }
   }
 
   ngOnInit(): void {
@@ -58,7 +89,7 @@ export class AppComponent implements OnInit {
  
 
   getGeoInfo(marker: PlaceMarker){
-    this.gMapsService.getGeoInfo(marker).subscribe((r) => console.log(r))
+    this.gMapsService.getGeoInfo(marker.latLng).subscribe((r) => console.log(r))
   }
 
   addMarker(event: google.maps.MapMouseEvent) {
@@ -71,7 +102,7 @@ export class AppComponent implements OnInit {
     }
     let m = new PlaceMarker(event.latLng, this.selectedType);
      
-    this.gMapsService.getGeoInfo(m).subscribe((r) => {
+    this.gMapsService.getGeoInfo(m.latLng).subscribe((r) => {
       m.placeId = r.results[0].place_id;
       m.latLng = r.results[0].geometry.location;
     }
@@ -105,7 +136,9 @@ export class AppComponent implements OnInit {
   addVehicle(){
     this.vehicles.push(new Vehicle(0));
   }
-
+  popVehicle(){
+    this.vehicles.pop();
+  }
   sendTask(){
     this.gMapsService.getDistMatrix(this.placeMarkers).subscribe((matrix: google.maps.DistanceMatrixResponse | null) => {
       if(!matrix){
@@ -113,8 +146,9 @@ export class AppComponent implements OnInit {
       }
       let taskId = uuidv4();
       this.taskService.sendTask(taskId, this.vehicles, this.placeMarkers, matrix).subscribe(()=> 
-        this.taskService.getSolution(taskId).subscribe((response) => {
-          console.log(response);
+        this.taskService.getSolution(taskId).subscribe((solution) => {
+          this.showSolution(solution)
+          console.log(solution);
         })
       );
     })

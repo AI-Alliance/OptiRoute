@@ -21,22 +21,28 @@ export class GMapsService {
         return of(false);
       }),
     );
-   }
+  }
 
-   onApiLoaded(){
+  onApiLoaded(){
     this.distanceMatrixService = new google.maps.DistanceMatrixService();
     
-   }
+  }
 
-   getGeoInfo(marker: PlaceMarker){
+  getGeoInfo(latLng: google.maps.LatLng){
     return this.geocoder.geocode({
-      location: marker.latLng
+      location: latLng
+    })
+  }
+
+  getGeoInfoById(placeId: string){
+    return this.geocoder.geocode({
+      placeId: placeId
     })
   }
 
   
-  loadRoute(places:PlaceMarker[]){
-    let route = [...places];
+  loadRoute(placesLatLng:google.maps.LatLng[]){
+    let route = [...placesLatLng];
     let origin = route[0];
     route.splice(0,1);
 
@@ -44,13 +50,13 @@ export class GMapsService {
     route.splice(route.length-1,1);
 
     let waypoints: google.maps.DirectionsWaypoint[] = route.map((p) => {return{
-      location: p.latLng
+      location: p
     }});
     
 
     const request: google.maps.DirectionsRequest = {
-      destination: destination.latLng,
-      origin: origin.latLng,
+      destination: destination,
+      origin: origin,
       waypoints: waypoints,
       travelMode: google.maps.TravelMode.DRIVING
     };
