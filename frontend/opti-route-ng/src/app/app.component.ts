@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { environment } from '../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, map, of } from 'rxjs';
-import { MapInfoWindow, MapMarker, MapGeocoder } from '@angular/google-maps';
+import { MapInfoWindow, MapMarker, MapGeocoder, MapDirectionsService } from '@angular/google-maps';
 import { PlaceMarker, PlaceType } from './models/PlaceMarker';
 import { Vehicle } from './models/Vehicle';
 import { TaskService } from './services/task.service';
@@ -37,7 +37,7 @@ export class AppComponent implements OnInit {
   lastMatrix: google.maps.DistanceMatrixResponse | undefined;
 
   private distanceMatrixService: google.maps.DistanceMatrixService | undefined;
-  constructor(private httpClient: HttpClient, private geocoder: MapGeocoder, private taskService: TaskService){
+  constructor(private httpClient: HttpClient, private geocoder: MapGeocoder, private taskService: TaskService, private  mapDirectionsService: MapDirectionsService){
     this.apiLoaded = this.httpClient.jsonp('https://maps.googleapis.com/maps/api/js?key=' + environment.gMapsApiKey, 'callback').pipe(
       map(() => {this.onApiLoaded(); return true}),
       catchError((error) => {
@@ -48,10 +48,21 @@ export class AppComponent implements OnInit {
   }
 
 
-
   onApiLoaded(){
     this.distanceMatrixService = new google.maps.DistanceMatrixService();
+
     
+  }
+
+
+  directionsResults$!: Observable<google.maps.DirectionsResult | undefined>;
+  loadRoute(){
+    const request: google.maps.DirectionsRequest = {
+      destination: this.placeMarkers[0].latLng,
+      origin: this.placeMarkers[1].latLng,
+      travelMode: google.maps.TravelMode.DRIVING
+    };
+    this.directionsResults$ = this.mapDirectionsService.route(request).pipe(map(response => response.result));
   }
 
   ngOnInit(): void {
@@ -76,8 +87,10 @@ export class AppComponent implements OnInit {
     if(this.hasDepotMarker() && this.selectedType == PlaceType.DEPOT){
       return;
     }
+    let m = new PlaceMarker(event.latLng, this.selectedType);
+     
 
-    this.placeMarkers.push(new PlaceMarker(event.latLng, this.selectedType));
+    this.placeMarkers.push(m);
     if(this.selectedType == PlaceType.DEPOT){
       this.selectedType = PlaceType.CLIENT;
     }

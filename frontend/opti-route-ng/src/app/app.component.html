@@ -33,6 +33,8 @@
       Add vehicle
     </button>
     <button class="btn btn-danger" (click)="sendTask()">Send Task</button>
+    <button class="btn btn-warning" (click)="loadRoute()">Load Route</button>
+
   </div>
   <div class="col" *ngIf="apiLoaded | async">
     <google-map  height="100%" width="100%" [options]="options" (mapClick)="addMarker($event)">
@@ -53,6 +55,8 @@
         <button *ngIf="lastMarker" (click)="deleteMarker(lastMarker)" class="btn btn-sm btn-danger">Delete marker</button>
         <button *ngIf="lastMarker" (click)="getGeoInfo(lastMarker)" class="btn btn-sm btn-info">Info</button>
       </map-info-window>
+
+      <map-directions-renderer *ngIf="directionsResults$ | async as directionsResults" [directions]="directionsResults"></map-directions-renderer>
     </google-map>
     
   </div>
