@@ -21,10 +21,10 @@ export class TaskService {
     return new Observable((observer) => {
       const handler = setInterval(() => 
         this.httpClient.get(environment.backendAddress + '/solutions/'+taskId).subscribe((response) => {
+          clearInterval(handler);
           observer.next(response);
           observer.complete();
-          clearInterval(handler);
-        }), 1000
+        }), 100
       )
     })
   }
