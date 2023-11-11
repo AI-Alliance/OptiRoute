@@ -1,24 +1,59 @@
-
-<div class="my-google-map" *ngIf="apiLoaded | async">
-  <google-map  height="100%" width="100%" [options]="options" (mapClick)="addMarker($event)">
-    
-    <map-marker *ngFor="let clientMarker of clientMarkers"  [position]="clientMarker.latLng" [options]="markerOptions" #marker="mapMarker" (mapMouseover)="openInfoWindow(clientMarker, marker)" ></map-marker>
-    <map-info-window>
-      {{lastMarker?.uuid}}
-      <button *ngIf="lastMarker" (click)="deleteMarker(lastMarker)" class="btn btn-sm btn-danger">Delete marker</button>
-      <button *ngIf="lastMarker" (click)="getGeoInfo(lastMarker)" class="btn btn-sm btn-info">Info</button>
-    </map-info-window>
-  </google-map>
-  <ng-container *ngIf="lastMatrix">
-    <div class="row" *ngFor="let row of lastMatrix.rows">
-      <div class="col" *ngFor="let el of row.elements">
-        {{el.distance.text}}
+<div class="row gx-0" style="height: 100vh;">
+  <div class="col-3">
+    <div class="row">
+      <div class="col">
+        <div class="btn-group" role="group" aria-label="Basic mixed styles example">
+          <button type="button" [disabled]="hasDepotMarker()" class="btn btn-outline-primary" [class.active]="selectedType == PlaceType.DEPOT" (click)="selectedType = PlaceType.DEPOT">{{PlaceType.DEPOT}}</button>
+          <button type="button" class="btn btn-outline-primary" [class.active]="selectedType == PlaceType.CLIENT" (click)="selectedType = PlaceType.CLIENT">{{PlaceType.CLIENT}}</button>
+        </div>
       </div>
     </div>
-  </ng-container>
-  
-
-  <button (click)="getDistanceMatrix()" class="btn btn-success">
-    Get distance matrix
-  </button>
+    <div class="h2">Places:</div>
+    <ul class="list-group" *ngFor="let placeMarker of placeMarkers">
+      <li class="list-group-item">
+        id: {{placeMarker.uuid}} demand:{{placeMarker.demand}}
+      </li>
+    </ul>
+    
+    <div class="h2">Vehicles:</div>
+    <ul class="list-group"*ngFor="let vehicle of vehicles">
+      <li class="list-group-item">
+        <div class="form-group row" >
+          <label>{{vehicle.uuid}}</label>
+          
+          <label class="col-3 col-form-label">Capacity:</label>
+          <div class="col">
+            <input class="form-control" min="0" max="20" type="number" (change)="vehicle.capacity = +$any($event.target).value" [value]="vehicle.capacity">
+          </div>
+        </div>
+      </li>
+    </ul>
+    
+    <button class="btn btn-secondary" (click)="addVehicle()">
+      Add vehicle
+    </button>
+    <button class="btn btn-danger" (click)="sendTask()">Send Task</button>
+  </div>
+  <div class="col" *ngIf="apiLoaded | async">
+    <google-map  height="100%" width="100%" [options]="options" (mapClick)="addMarker($event)">
+      
+      <map-marker *ngFor="let placeMarker of placeMarkers"  [position]="placeMarker.latLng" [options]="{draggable: false, label: placeMarker.type}" #marker="mapMarker" (mapMouseover)="openInfoWindow(placeMarker, marker)" ></map-marker>
+      <map-info-window>
+        <div class="my-3">
+          <div class="mb-1">
+            {{lastMarker?.uuid}}
+          </div>
+          <div class="form-group row" *ngIf="lastMarker && lastMarker.type!= PlaceType.DEPOT">
+            <label class="col-3 col-form-label">Demand:</label>
+            <div class="col">
+              <input class="form-control" min="0" max="20" type="number" (change)="lastMarker.demand = +$any($event.target).value" [value]="lastMarker.demand">
+            </div>
+          </div>
+        </div>
+        <button *ngIf="lastMarker" (click)="deleteMarker(lastMarker)" class="btn btn-sm btn-danger">Delete marker</button>
+        <button *ngIf="lastMarker" (click)="getGeoInfo(lastMarker)" class="btn btn-sm btn-info">Info</button>
+      </map-info-window>
+    </google-map>
+    
+  </div>
 </div>
