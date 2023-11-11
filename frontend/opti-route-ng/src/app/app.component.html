@@ -36,7 +36,7 @@
     <button class="btn btn-warning" (click)="loadRoute()">Load Route</button>
 
   </div>
-  <div class="col" *ngIf="apiLoaded | async">
+  <div class="col" *ngIf="gMapsService.apiLoaded| async">
     <google-map  height="100%" width="100%" [options]="options" (mapClick)="addMarker($event)">
       
       <map-marker *ngFor="let placeMarker of placeMarkers"  [position]="placeMarker.latLng" [options]="{draggable: false, label: placeMarker.type}" #marker="mapMarker" (mapMouseover)="openInfoWindow(placeMarker, marker)" ></map-marker>

@@ -6,6 +6,7 @@ import { MapInfoWindow, MapMarker, MapGeocoder, MapDirectionsService } from '@an
 import { PlaceMarker, PlaceType } from './models/PlaceMarker';
 import { Vehicle } from './models/Vehicle';
 import { TaskService } from './services/task.service';
+import { GMapsService } from './services/g-maps.service';
 
 
 
@@ -19,7 +20,7 @@ export class AppComponent implements OnInit {
   PlaceType: typeof PlaceType = PlaceType;
   selectedType: PlaceType = PlaceType.DEPOT;
 
-  apiLoaded: Observable<boolean>;
+  
   options: google.maps.MapOptions = {
     center: {lat: 54.36975172380843, lng: 18.610832380277717},
     zoom: 20,
@@ -34,35 +35,16 @@ export class AppComponent implements OnInit {
   placeMarkers: PlaceMarker[] = [];
   vehicles: Vehicle[] = [];
 
-  lastMatrix: google.maps.DistanceMatrixResponse | undefined;
 
-  private distanceMatrixService: google.maps.DistanceMatrixService | undefined;
-  constructor(private httpClient: HttpClient, private geocoder: MapGeocoder, private taskService: TaskService, private  mapDirectionsService: MapDirectionsService){
-    this.apiLoaded = this.httpClient.jsonp('https://maps.googleapis.com/maps/api/js?key=' + environment.gMapsApiKey, 'callback').pipe(
-      map(() => {this.onApiLoaded(); return true}),
-      catchError((error) => {
-        console.error(error);
-        return of(false);
-      }),
-    );
-  }
-
-
-  onApiLoaded(){
-    this.distanceMatrixService = new google.maps.DistanceMatrixService();
-
+  constructor(private geocoder: MapGeocoder, private taskService: TaskService, protected gMapsService: GMapsService){
     
   }
 
 
   directionsResults$!: Observable<google.maps.DirectionsResult | undefined>;
   loadRoute(){
-    const request: google.maps.DirectionsRequest = {
-      destination: this.placeMarkers[0].latLng,
-      origin: this.placeMarkers[1].latLng,
-      travelMode: google.maps.TravelMode.DRIVING
-    };
-    this.directionsResults$ = this.mapDirectionsService.route(request).pipe(map(response => response.result));
+    
+    this.directionsResults$ = this.gMapsService.loadRoute(this.placeMarkers[0], this.placeMarkers[1]);
   }
 
   ngOnInit(): void {
@@ -71,12 +53,7 @@ export class AppComponent implements OnInit {
   }
 
   getGeoInfo(marker: PlaceMarker){
-    this.geocoder.geocode({
-      location: marker.latLng
-    }).subscribe(({results}) => {
-      // this.placeMarkers.push(new PlaceMarker(results[0].geometry.location, PlaceType.CLIENT))
-      console.log(results);
-    });
+    this.gMapsService.getGeoInfo(marker).subscribe((r) => console.log(r))
   }
 
   addMarker(event: google.maps.MapMouseEvent) {
@@ -120,22 +97,13 @@ export class AppComponent implements OnInit {
   }
 
   sendTask(){
-
-    this.distanceMatrixService?.getDistanceMatrix(
-      {
-        origins: this.placeMarkers.map(m => m.latLng),
-        destinations: this.placeMarkers.map(m => m.latLng),
-        travelMode: google.maps.TravelMode.DRIVING
-      },
-      (response: google.maps.DistanceMatrixResponse | null) => {
-        console.log(response); 
-        if(!response){
-          return;
-        }
-
-        this.taskService.sendTask(this.vehicles, this.placeMarkers, response).subscribe((response)=> console.log(response));
-
+    this.gMapsService.getDistMatrix(this.placeMarkers).subscribe((response: google.maps.DistanceMatrixResponse | null) => {
+      if(!response){
+        return;
       }
-    )
+
+      this.taskService.sendTask(this.vehicles, this.placeMarkers, response).subscribe((response)=> console.log(response));
+    })
+    
   }
 }
