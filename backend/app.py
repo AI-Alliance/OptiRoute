@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, abort
 from flask import request
 from flask import jsonify
 from flask_cors import CORS, cross_origin
@@ -46,3 +46,14 @@ def get_solutions():
     return jsonify({
         "solutions": list(map(lambda t: t.to_dict(), solutionService.get_all()))
     })
+
+
+@app.route('/solutions/<string:task_id>')
+@cross_origin()
+def get_solution_by_task(task_id):
+    solution = solutionService.get_by_task_id(task_id)
+    if solution is None:
+        abort(404)
+    return jsonify(
+        solution.to_dict()
+    )

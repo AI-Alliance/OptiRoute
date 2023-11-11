@@ -3,9 +3,15 @@ from logic.models.Model import Model
 
 class Vehicle(Model):
     def __init__(self, vehicle_id: int, capacity: int):
-        self.vehicle_id = vehicle_id
-        self.capacity = capacity
-        print(f"Vehicle {self.vehicle_id}  with capacity {self.capacity}  was created!")
+        self._vehicle_id = vehicle_id
+        self._capacity = capacity
+        print(f"Vehicle {self._vehicle_id}  with capacity {self._capacity}  was created!")
+    @property
+    def vehicle_id(self):
+        return self._vehicle_id
+    @property
+    def capacity(self):
+        return self._capacity
 
     @staticmethod
     def create_from_dict(place_dict: dict):
