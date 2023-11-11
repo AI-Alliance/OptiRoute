@@ -66,7 +66,12 @@ export class AppComponent implements OnInit {
     }
     let m = new PlaceMarker(event.latLng, this.selectedType);
      
-
+    this.gMapsService.getGeoInfo(m).subscribe((r) => {
+      m.placeId = r.results[0].place_id;
+      m.latLng = r.results[0].geometry.location;
+    }
+    
+    )
     this.placeMarkers.push(m);
     if(this.selectedType == PlaceType.DEPOT){
       this.selectedType = PlaceType.CLIENT;

@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { MapDirectionsService, MapGeocoder } from '@angular/google-maps';
-import { Observable, catchError, map, of } from 'rxjs';
+import { MapDirectionsService, MapGeocoder, MapGeocoderResponse } from '@angular/google-maps';
+import { Observable, catchError, forkJoin, map, of } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { PlaceMarker } from '../models/PlaceMarker';
 
@@ -46,6 +46,11 @@ export class GMapsService {
 
   getDistMatrix(placeMarkers: PlaceMarker[]){
 
+    // for (const placeMarker of placeMarkers) {
+    //   this.getGeoInfo(placeMarker).subscribe((r) => placeMarker.placeId = r.results[0].place_id)
+    // }
+
+   
     return new Observable<google.maps.DistanceMatrixResponse | null>((observer) => {
       this.distanceMatrixService?.getDistanceMatrix(
         {
@@ -63,21 +68,4 @@ export class GMapsService {
 
   }
 
-  //   this.distanceMatrixService?.getDistanceMatrix(
-  //     {
-  //       origins: placeMarkers.map(m => m.latLng),
-  //       destinations: placeMarkers.map(m => m.latLng),
-  //       travelMode: google.maps.TravelMode.DRIVING
-  //     },
-  //     (response: google.maps.DistanceMatrixResponse | null) => {
-  //       console.log(response); 
-  //       if(!response){
-  //         return;
-  //       }
-
-  //       this.taskService.sendTask(this.vehicles, this.placeMarkers, response).subscribe((response)=> console.log(response));
-
-  //     }
-  //   )
-  // }
 }

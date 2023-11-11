@@ -21,7 +21,7 @@ export class TaskService {
 
     for(let i = 0; i < places.length; i++){
       let place = places[i];
-      placesToSend.push({place_id: place.uuid, place_index: i, demand: place.demand});
+      placesToSend.push({place_id: place.placeId, place_index: i, demand: place.demand});
     }
 
     let vehiclesToSend = vehicles.map((v)=> {return {vehicle_id: v.uuid, capacity: v.capacity}});

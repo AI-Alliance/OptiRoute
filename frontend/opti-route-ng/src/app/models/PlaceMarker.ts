@@ -2,6 +2,7 @@ import { MapMarker } from '@angular/google-maps';
 import { v4 as uuidv4 } from 'uuid';
 export class PlaceMarker{
     uuid: string;
+    placeId: string = '';
     latLng: google.maps.LatLng;
     type: PlaceType;
     demand: number;

@@ -11,7 +11,7 @@
     <div class="h2">Places:</div>
     <ul class="list-group" *ngFor="let placeMarker of placeMarkers">
       <li class="list-group-item">
-        id: {{placeMarker.uuid}} demand:{{placeMarker.demand}}
+        id: {{placeMarker.placeId}} demand:{{placeMarker.demand}}
       </li>
     </ul>
     
@@ -43,7 +43,7 @@
       <map-info-window>
         <div class="my-3">
           <div class="mb-1">
-            {{lastMarker?.uuid}}
+            {{lastMarker?.placeId}}
           </div>
           <div class="form-group row" *ngIf="lastMarker && lastMarker.type!= PlaceType.DEPOT">
             <label class="col-3 col-form-label">Demand:</label>
