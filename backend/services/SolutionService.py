@@ -15,3 +15,6 @@ class SolutionService(Service):
 
     def get_all(self) -> list[Solution]:
         return self.solutions
+
+    def get_by_task_id(self, task_id):
+        return next((solution for solution in self.solutions if solution.task.id == task_id), None)

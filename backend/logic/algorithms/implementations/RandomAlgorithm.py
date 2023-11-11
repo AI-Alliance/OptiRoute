@@ -11,7 +11,9 @@ class RandomAlgorithm(Algorithm):
     def solve(self, task: Task) -> Solution:
         depot:Place = task.places[0]
         clients = task.places[1:]
-        vehicles =task.vehicles
+        vehicles = task.vehicles
+
+
         vehicles_to_places_dict = {}
 
         # starting from depot
