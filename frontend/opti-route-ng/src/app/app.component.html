@@ -55,8 +55,9 @@
         <button *ngIf="lastMarker" (click)="deleteMarker(lastMarker)" class="btn btn-sm btn-danger">Delete marker</button>
         <button *ngIf="lastMarker" (click)="getGeoInfo(lastMarker)" class="btn btn-sm btn-info">Info</button>
       </map-info-window>
-
-      <map-directions-renderer *ngIf="directionsResults$ | async as directionsResults" [directions]="directionsResults"></map-directions-renderer>
+      <ng-container *ngFor="let dr$ of directionsResults ">
+        <map-directions-renderer *ngIf="dr$ | async as dr" [directions]="dr" [options]="directionsRendererOptions"></map-directions-renderer>
+      </ng-container>
     </google-map>
     
   </div>

@@ -35,10 +35,23 @@ export class GMapsService {
   }
 
   
-  loadRoute(origin: PlaceMarker, destination: PlaceMarker){
+  loadRoute(places:PlaceMarker[]){
+    let route = [...places];
+    let origin = route[0];
+    route.splice(0,1);
+
+    let destination = route[route.length-1];
+    route.splice(route.length-1,1);
+
+    let waypoints: google.maps.DirectionsWaypoint[] = route.map((p) => {return{
+      location: p.latLng
+    }});
+    
+
     const request: google.maps.DirectionsRequest = {
       destination: destination.latLng,
       origin: origin.latLng,
+      waypoints: waypoints,
       travelMode: google.maps.TravelMode.DRIVING
     };
     return this.mapDirectionsService.route(request).pipe(map(response => response.result));

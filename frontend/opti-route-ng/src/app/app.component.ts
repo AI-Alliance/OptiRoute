@@ -7,6 +7,7 @@ import { PlaceMarker, PlaceType } from './models/PlaceMarker';
 import { Vehicle } from './models/Vehicle';
 import { TaskService } from './services/task.service';
 import { GMapsService } from './services/g-maps.service';
+import { v4 as uuidv4 } from 'uuid';
 
 
 
@@ -41,16 +42,20 @@ export class AppComponent implements OnInit {
   }
 
 
-  directionsResults$!: Observable<google.maps.DirectionsResult | undefined>;
+  directionsResults: Observable<google.maps.DirectionsResult | undefined>[] = [];
+  directionsRendererOptions: google.maps.DirectionsRendererOptions = {polylineOptions: {strokeColor: 'green'}};
   loadRoute(){
     
-    this.directionsResults$ = this.gMapsService.loadRoute(this.placeMarkers[0], this.placeMarkers[1]);
+    this.directionsResults.push(this.gMapsService.loadRoute(this.placeMarkers));
+    
   }
 
   ngOnInit(): void {
-   
+    
   
   }
+
+ 
 
   getGeoInfo(marker: PlaceMarker){
     this.gMapsService.getGeoInfo(marker).subscribe((r) => console.log(r))
@@ -102,12 +107,16 @@ export class AppComponent implements OnInit {
   }
 
   sendTask(){
-    this.gMapsService.getDistMatrix(this.placeMarkers).subscribe((response: google.maps.DistanceMatrixResponse | null) => {
-      if(!response){
+    this.gMapsService.getDistMatrix(this.placeMarkers).subscribe((matrix: google.maps.DistanceMatrixResponse | null) => {
+      if(!matrix){
         return;
       }
-
-      this.taskService.sendTask(this.vehicles, this.placeMarkers, response).subscribe((response)=> console.log(response));
+      let taskId = uuidv4();
+      this.taskService.sendTask(taskId, this.vehicles, this.placeMarkers, matrix).subscribe(()=> 
+        this.taskService.getSolution(taskId).subscribe((response) => {
+          console.log(response);
+        })
+      );
     })
     
   }
