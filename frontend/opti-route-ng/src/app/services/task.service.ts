@@ -4,6 +4,8 @@ import { environment } from 'src/environments/environment';
 import { Vehicle } from '../models/Vehicle';
 import { PlaceMarker } from '../models/PlaceMarker';
 import { v4 as uuidv4 } from 'uuid';
+import { Observable } from 'rxjs';
+import { Solution } from '../models/Solution';
 
 @Injectable({
   providedIn: 'root'
@@ -14,9 +16,21 @@ export class TaskService {
     
   }
 
-  sendTask(vehicles: Vehicle[], places: PlaceMarker[], matrix: google.maps.DistanceMatrixResponse){
+  getSolution(taskId: string){
 
-    console.log(matrix);
+
+    return new Observable<Solution>((observer) => {
+      const handler = setInterval(() => 
+        this.httpClient.get<Solution>(environment.backendAddress + '/solutions/'+taskId).subscribe((response: Solution) => {
+          clearInterval(handler);
+          observer.next(response);
+          observer.complete();
+        }), 100
+      )
+    })
+  }
+
+  sendTask(taskId:string, vehicles: Vehicle[], places: PlaceMarker[], matrix: google.maps.DistanceMatrixResponse){
     let placesToSend = [];
 
     for(let i = 0; i < places.length; i++){
@@ -40,7 +54,7 @@ export class TaskService {
 
     // matrixToSend.forEach((r )=> r.elements.map(e=> e.duration.value))
     return this.httpClient.post(environment.backendAddress +'/tasks',{
-      task_id: uuidv4(),
+      task_id: taskId,
       places: placesToSend,
       vehicles: vehiclesToSend,
       rows: matrixToSend
