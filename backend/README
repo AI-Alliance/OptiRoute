@@ -6,7 +6,16 @@ flask run
 ### Run with debug (automatically reload)
 flask run --debug
 
+### ENDPOINTS
 
+GET, POST
+http://127.0.0.1:5000/tasks
+
+GET
+http://127.0.0.1:5000/solutions
+
+GET
+http://127.0.0.1:5000/solutions/774cca52-dd96-42b1-bb88-5c422ff30ce8
 
 ### POST REQUEST
 
