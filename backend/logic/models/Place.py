@@ -11,9 +11,10 @@ class Place(Model):
     @staticmethod
     def create_from_dict(place_dict: dict):
         place_id = place_dict['place_id']
-        place_index = place_dict['place_index']
         demand = place_dict['demand']
-        return Place(place_id, place_index, demand)
+        place_index = place_dict['place_index']
+
+        return Place(place_id, demand, place_index)
 
     def to_dict(self):
         return {
