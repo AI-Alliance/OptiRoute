@@ -1,11 +1,9 @@
 import numpy as np
 from logic import Task, TaskBuilder
 from logic.models import Place
-from typing import List, TypeVar
 
 from logic.models.Vehicle import Vehicle
 
-T = TypeVar("T")
 
 class RequestToTaskConverter:
     @staticmethod
@@ -20,6 +18,8 @@ class RequestToTaskConverter:
 
         task = TaskBuilder() \
             .set_distance_matrix(distance_matrix) \
+            .set_places(places)\
+            .set_vehicles(vehicles)\
             .get_task()
         print("Request was converted.")
         return task
