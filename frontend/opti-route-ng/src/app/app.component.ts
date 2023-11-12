@@ -139,6 +139,11 @@ export class AppComponent implements OnInit {
   popVehicle(){
     this.vehicles.pop();
   }
+
+  taskDataIsReady(){
+    return this.vehicles.length && (this.placeMarkers.length > 1) && this.hasDepotMarker()
+  }
+
   sendTask(){
     this.gMapsService.getDistMatrix(this.placeMarkers).subscribe((matrix: google.maps.DistanceMatrixResponse | null) => {
       if(!matrix){
