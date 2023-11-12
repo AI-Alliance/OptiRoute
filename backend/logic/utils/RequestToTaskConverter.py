@@ -13,9 +13,9 @@ class RequestToTaskConverter:
         rows_list: list = request_dict['rows']
         places_dict_list: list = request_dict['places']
         vehicles_dict_list: list = request_dict['vehicles']
-        places = RequestToTaskConverter.get_models_from_dictionary(places_dict_list, Place)
-        vehicles = RequestToTaskConverter.get_models_from_dictionary(vehicles_dict_list, Vehicle)
-        distance_matrix = RequestToTaskConverter.rows_list_to_distance_matrix(rows_list)
+        places = RequestToTaskConverter.__get_models_from_dictionary(places_dict_list, Place)
+        vehicles = RequestToTaskConverter.__get_models_from_dictionary(vehicles_dict_list, Vehicle)
+        distance_matrix = RequestToTaskConverter.__rows_list_to_distance_matrix(rows_list)
 
         task = TaskBuilder() \
             .set_id(task_id)\
@@ -27,7 +27,7 @@ class RequestToTaskConverter:
         return task
 
     @staticmethod
-    def rows_list_to_distance_matrix(rows_list: list):
+    def __rows_list_to_distance_matrix(rows_list: list):
         size = len(rows_list)
         matrix = np.zeros((size, size))
         print(f"Row list:{rows_list}")
@@ -40,7 +40,7 @@ class RequestToTaskConverter:
         return matrix
 
     @staticmethod
-    def get_models_from_dictionary(models_dict_list: list, model_class):
+    def __get_models_from_dictionary(models_dict_list: list, model_class):
         models = []
         size = len(models_dict_list)
         for i in range(size):

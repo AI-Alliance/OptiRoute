@@ -8,7 +8,7 @@ class Solution:
     def __init__(self, task: Task, vehicles_to_places_dict: dict):
         self._id: str = str(uuid.uuid4())
         self._task: Task = task
-        self._vehicle_route_dicts_list: list = self.get_vehicle_route_dictionaries_list(vehicles_to_places_dict)
+        self._vehicle_route_dicts_list: list = self.create_vehicle_route_dictionaries_list(vehicles_to_places_dict)
         print("Solution created")
 
     @property
@@ -26,7 +26,7 @@ class Solution:
             "vehicles": self._vehicle_route_dicts_list
         }
 
-    def get_vehicle_route_dictionaries_list(self, vehicles_to_places_dict: dict):
+    def create_vehicle_route_dictionaries_list(self, vehicles_to_places_dict: dict):
         dicts_list = []
         for vehicle_id, places_id_list in vehicles_to_places_dict.items():
             vehicle_route_dict = dict()
