@@ -77,10 +77,11 @@ export class GMapsService {
           destinations: placeMarkers.map(m => m.latLng),
           travelMode: google.maps.TravelMode.DRIVING
         },
-        (response: google.maps.DistanceMatrixResponse | null) => {
+        (response: google.maps.DistanceMatrixResponse | null, status: google.maps.DistanceMatrixStatus) => {
+          console.log(status);
           observer.next(response);
           observer.complete()
-        }
+        },
       )
     })
 
