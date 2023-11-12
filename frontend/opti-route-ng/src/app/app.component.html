@@ -1,46 +1,41 @@
 <div class="row gx-0" style="height: 100vh;">
-  <div class="col-3">
-    <div class="row">
-      <div class="col">
-        <div class="btn-group" role="group" aria-label="Basic mixed styles example">
-          <button type="button" [disabled]="hasDepotMarker()" class="btn btn-outline-primary" [class.active]="selectedType == PlaceType.DEPOT" (click)="selectedType = PlaceType.DEPOT">{{PlaceType.DEPOT}}</button>
-          <button type="button" class="btn btn-outline-primary" [class.active]="selectedType == PlaceType.CLIENT" (click)="selectedType = PlaceType.CLIENT">{{PlaceType.CLIENT}}</button>
-        </div>
-      </div>
+  <div class="d-flex align-items-start flex-column col-2 m-3">
+  
+    <h2>Marker type</h2>
+    <div class="btn-group" role="group" aria-label="Basic mixed styles example">
+      <button type="button" [disabled]="hasDepotMarker()" class="btn btn-outline-primary" [class.active]="selectedType == PlaceType.DEPOT" (click)="selectedType = PlaceType.DEPOT">Depot</button>
+      <button type="button" class="btn btn-outline-primary" [class.active]="selectedType == PlaceType.CLIENT" (click)="selectedType = PlaceType.CLIENT">Client</button>
     </div>
-    <!-- <div class="h2">Places:</div>
-    <ul class="list-group" *ngFor="let placeMarker of placeMarkers">
-      <li class="list-group-item">
-        id: {{placeMarker.placeId}} demand:{{placeMarker.demand}}
-      </li>
-    </ul> -->
-    
-    <div class="h2">Vehicles: 
-      <button class="btn btn-secondary" (click)="addVehicle()">
-        +
-      </button>
-      <button class="btn btn-secondary" (click)="popVehicle()">
-        -
-      </button>
+
+    <div class="mt-5">
+      <div class="h2">Vehicles
+        <button class="btn btn-secondary" (click)="addVehicle()">
+          +
+        </button>
+        
+      </div>
     </div>
     
     <ul class="list-group"*ngFor="let vehicle of vehicles">
       <li class="list-group-item">
         <div class="form-group row" >
-          <label>{{vehicle.uuid}}</label>
+          <small class="text-muted">{{vehicle.uuid}}</small>
           
           <label class="col-3 col-form-label">Capacity:</label>
           <div class="col">
             <input class="form-control" min="0" max="20" type="number" (change)="vehicle.capacity = +$any($event.target).value" [value]="vehicle.capacity">
           </div>
+          <div class="col-2">
+            <button class="btn btn-sm btn-outline-danger" (click)="removeVehicle(vehicle.uuid)">
+              X
+            </button>
+          </div>
         </div>
       </li>
     </ul>
     
+    <div class="mt-auto"><button class="btn btn-success" [disabled]="!taskDataIsReady()" (click)="sendTask()">Send Task</button></div>
     
-    <button class="btn btn-danger" [disabled]="!taskDataIsReady()" (click)="sendTask()">Send Task</button>
-    <!-- <button class="btn btn-warning" (click)="loadRoute()">Load Route</button> -->
-
   </div>
   <div class="col" *ngIf="gMapsService.apiLoaded| async">
     <google-map  height="100%" width="100%" [options]="options" (mapClick)="addMarker($event)">

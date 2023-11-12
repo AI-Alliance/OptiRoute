@@ -146,8 +146,11 @@ export class AppComponent implements OnInit {
   addVehicle(){
     this.vehicles.push(new Vehicle(0));
   }
-  popVehicle(){
-    this.vehicles.pop();
+  removeVehicle(id: string){
+    let i = this.vehicles.findIndex(v => v.uuid == id);
+    if (i > -1) {
+      this.vehicles.splice(i, 1);
+    }
   }
 
   taskDataIsReady(){
