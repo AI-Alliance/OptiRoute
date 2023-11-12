@@ -6,20 +6,26 @@ export class PlaceMarker{
     latLng: google.maps.LatLng;
     type: PlaceType;
     demand: number;
-    markerOptions: google.maps.MarkerOptions;
+    markerOptions!: google.maps.MarkerOptions;
+    text: string | null = null;
 
     constructor(latLng: google.maps.LatLng, type: PlaceType){
         this.uuid = uuidv4();
         this.latLng = latLng;
         this.type = type;
         this.demand = 0;
-        this.markerOptions = this.getMarketOptions();
+        this.setMarketOptions();
     }
 
-    private getMarketOptions(){
+    setText(text: string | null){
+        this.text = text;
+        this.setMarketOptions();
+    }
+
+    private setMarketOptions(){
        let opitons: google.maps.MarkerOptions = {
         draggable: false, 
-        label: {text: this.type.charAt(0).toUpperCase(), fontSize: '30px'}
+        label: {text: this.text ?? this.type.charAt(0).toUpperCase(), fontSize: '30px'}
         };
         let icon: google.maps.Symbol = {path: '', fillColor: '', fillOpacity: 0.5, scale: 0.7 };
         
@@ -37,7 +43,7 @@ export class PlaceMarker{
         
         opitons.icon = icon;
 
-        return opitons;
+        this.markerOptions = opitons;
     }
 }
 enum Icons{

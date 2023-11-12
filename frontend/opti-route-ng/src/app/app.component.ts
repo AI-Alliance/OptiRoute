@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { environment } from '../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, forkJoin, map, of } from 'rxjs';
+import { Observable, catchError, forkJoin, map, of, tap } from 'rxjs';
 import { MapInfoWindow, MapMarker, MapGeocoder, MapDirectionsService, MapGeocoderResponse } from '@angular/google-maps';
 import { PlaceMarker, PlaceType } from './models/PlaceMarker';
 import { Vehicle } from './models/Vehicle';
@@ -43,7 +43,8 @@ export class AppComponent implements OnInit {
   }
 
 
-  directionsResults: Observable<google.maps.DirectionsResult | undefined>[] = [];
+  directionsResults: Array<google.maps.DirectionsResult | undefined> = [];
+  directionsOrder = [];
   directionsRendererOptions: google.maps.DirectionsRendererOptions[] = []; 
   loadRoute(placesId:string[], color: string){
     
@@ -54,16 +55,16 @@ export class AppComponent implements OnInit {
       observers.push(
         this.gMapsService.getGeoInfoById(placeId)
       )
-      this.gMapsService.getGeoInfoById(placeId).subscribe((r) => {
-        placesLatLng.push(r.results[0].geometry.location);
-      })
     }
     forkJoin(observers).subscribe((responses) => {
       responses.forEach((r) => {
         placesLatLng.push(r.results[0].geometry.location);
       })  
-      this.directionsResults.push(this.gMapsService.loadRoute(placesLatLng));
-      this.directionsRendererOptions.push({markerOptions:{visible: false}, polylineOptions: {strokeColor: color, strokeOpacity: 0.5}});
+      this.gMapsService.loadRoute(placesLatLng).subscribe(r => {
+        this.directionsResults.push(r);
+        this.directionsRendererOptions.push({markerOptions:{visible: false}, polylineOptions: {strokeColor: color, strokeOpacity: 0.5}});
+      })
+      
     })
   }
 
@@ -72,11 +73,20 @@ export class AppComponent implements OnInit {
     this.directionsResults = [];
   }
 
+  refreshMarkersText(){
+    this.placeMarkers.forEach(m => m.setText(null));
+  }
+
   showSolution(solution: Solution){
-    let colors = ['red', 'green', 'yellow', 'purple'];
+    let colors = ['red', 'green', 'purple'];
 
     this.clearRoutes();
+    this.refreshMarkersText();
     for (const vehicle of solution.vehicles) {
+      for(let i = 0; i < vehicle.route.length; i++){
+        this.placeMarkers.find((m) => (m.placeId == vehicle.route[i].place_id) && (m.type == PlaceType.CLIENT))?.setText(i.toString());
+      }
+
       this.loadRoute(vehicle.route.map((p)=> p.place_id), colors.pop() ?? 'black');
     }
   }
@@ -152,8 +162,8 @@ export class AppComponent implements OnInit {
       let taskId = uuidv4();
       this.taskService.sendTask(taskId, this.vehicles, this.placeMarkers, matrix).subscribe(()=> 
         this.taskService.getSolution(taskId).subscribe((solution) => {
+
           this.showSolution(solution)
-          console.log(solution);
         })
       );
     })
