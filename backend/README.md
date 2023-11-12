@@ -67,7 +67,7 @@ http://127.0.0.1:5000/solutions/774cca52-dd96-42b1-bb88-5c422ff30ce8
          {
             "vehicle_id": "490091c1-c7ea-4fed-8a1d-b2fd1a244384",
             "route": [
-               {
+                {
                     "place_id" : "694cca52-dd96-42b1-bb88-5c422ff30ce8",
                     "place_index" : 0,
                     "demand": 0
