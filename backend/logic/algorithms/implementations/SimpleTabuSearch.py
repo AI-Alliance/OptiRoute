@@ -69,7 +69,9 @@ class SwapMove(Move):
 
 
 class STabuSearch(Algorithm):
-    TS_iter = 10
+    TS_iter = 50
+    CAP_OVERLOAD_PENALTY = 5
+    use_capacity = True
 
     def __init__(self):
         super().__init__()
@@ -95,33 +97,33 @@ class STabuSearch(Algorithm):
             print("No vehicles!")
             return solution
 
-        self.capacity = self.vehicles[0]  # no hemogenous fleet implemented yet
+        self.capacity: int = self.vehicles[0].capacity  # TODO
 
         # starting from depot
         for vehicle in self.vehicles:
-            vehicles_to_places_dict[vehicle.vehicle_id] = [self.depot.place_id]
+            vehicles_to_places_dict[vehicle.vehicle_id] = [self.depot]
 
-        # initial
-        self.s0 = [[] for x in self.clients]
-        for i in range(2):
-            for client in self.clients:
-                vehicle = random.choice(self.vehicles)
-                vehicles_to_places_dict[vehicle.vehicle_id].append(client.place_id)
-        # for now let's say len(vehicles) = x * len(clients)
+        # initial solution
+        self.s0 = [[] for x in self.vehicles]
+        for client in self.clients:
+            v_i = random.randint(0, len(self.vehicles)-1)
+            self.s0[v_i].append(client.place_index-1)
 
         best = self.search()
         for route, vehicle in zip(best, self.vehicles):
             for r in route:
-                c_id = self.clients[r]
-                vehicles_to_places_dict[vehicle.vehicle_id].append(c_id)
-
+                place: Place = self.clients[r]
+                vehicles_to_places_dict[vehicle.vehicle_id].append(place)
 
         # finishing in depot
         for vehicle in self.vehicles:
-            vehicles_to_places_dict[vehicle.vehicle_id].append(self.depot.place_id)
+            vehicles_to_places_dict[vehicle.vehicle_id].append(self.depot)
 
+        vehicles_id_to_places_id_dict = {}
+        for vehicle_id, places_list in vehicles_to_places_dict.items():
+            vehicles_id_to_places_id_dict[vehicle_id] = [place.place_id for place in places_list]
+        solution = Solution(task, vehicles_id_to_places_id_dict)
 
-        solution = Solution(task, vehicles_to_places_dict)
         print("Problem Solved!")
         return solution
 
@@ -141,7 +143,6 @@ class STabuSearch(Algorithm):
             best_moves = s_neighborhood[0]
             best_candidate = best_moves.make_move(best_candidate)
             for s_candidate_moves in s_neighborhood:
-                # print(str_moves(s_candidate_moves,best_global))  # debug
                 if not s_candidate_moves.check_tabu_list(self.tabu_list):
                     s_b = s_candidate_moves.make_move(best_global)
                     if self.fitness(s_b) > self.fitness(best_candidate):
@@ -152,16 +153,14 @@ class STabuSearch(Algorithm):
                 s_best = best_candidate
             best_global = copy(best_candidate)
             best_moves.update_tabu_list(self.tabu_list)
-            # self.tabu_list += best_moves.update_tabu_list(self.tabu_list)
-            best_moves.update_tabu_list(self.tabu_list)
-            # self.tabu_list.add(best_moves.tabu_trace())
             if len(self.tabu_list) > self.max_tabu_size:
                 self.tabu_list.pop()
             i += 1
             best_fit = self.fitness(s_best)
             if i % 10 == 0:
                 print(f"TS {i}/{self.TS_iter} current best: {-best_fit}")
-        return best_global
+        self.best_cost = -best_fit
+        return s_best
 
     def stopping_condition(self, i):
         return i > self.TS_iter
@@ -182,7 +181,7 @@ class STabuSearch(Algorithm):
                 sol = InsertMove(r1, r2, v1, i2)
                 solutions.append(sol)
                 # sol = SwapMove(r1, r2, v1, v2, i1, i2)
-                # solutions.append(sol)
+                # solutions.append(sol) # it's slow
             sol = InsertMove(r1, r2, v1, None)
             solutions.append(sol)
         return solutions
@@ -195,35 +194,29 @@ class STabuSearch(Algorithm):
         for route in solution:
             if len(route) == 0:
                 continue
-            u = 0
-            for node in route:
-                d = self.distances[self.clients[u], self.clients[node]]
-                weight += d
+            u = route[0]
+            weight += self.distances[self.depot.place_index][self.clients[u].place_index]
+            for node in route[1:]:
+                weight += self.distances[self.clients[u].place_index][self.clients[node].place_index]
                 u = node
-            d = self.distances[self.clients[u], self.clients[0]]
-            weight += d
+            # weight += = self.distances[self.clients[u].place_index][self.depot.place_index]
             cap_overload += self.calc_capacity(route, self.capacity)
-        return - (weight + cap_overload * 2)
+        return - (weight + cap_overload * self.CAP_OVERLOAD_PENALTY)
 
     def calc_capacity(self, route, capacity):
         if not self.use_capacity:
-            return True
+            return 0
         current_capacity = 0
         for v in route:
             current_capacity += self.get_demand(v)
-        return current_capacity - capacity
+        if current_capacity > capacity:
+            return current_capacity - capacity
+        return 0
 
     def check_capacity_valid(self, route, capacity):
         return self.calc_capacity(route, capacity) <= 0
 
-    # def get_edge_cost(self, u, v):
-    #     p1 = self.points[u]
-    #     p2 = self.points[v]
-    #     return calc_distance(p1, p2)
 
     def get_demand(self, v):
-        return 1  # TODO capacities
-
-
-
+        return self.clients[v].demand
 
