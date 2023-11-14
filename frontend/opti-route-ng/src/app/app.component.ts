@@ -21,7 +21,7 @@ import { Solution } from './models/Solution';
 export class AppComponent implements OnInit {
   PlaceType: typeof PlaceType = PlaceType;
   selectedType: PlaceType = PlaceType.DEPOT;
-
+  taskLoading: boolean = false;
   
   options: google.maps.MapOptions = {
     center: {lat: 54.36975172380843, lng: 18.610832380277717},
@@ -163,12 +163,13 @@ export class AppComponent implements OnInit {
         return;
       }
       let taskId = uuidv4();
-      this.taskService.sendTask(taskId, this.vehicles, this.placeMarkers, matrix).subscribe(()=> 
+      this.taskLoading = true;
+      this.taskService.sendTask(taskId, this.vehicles, this.placeMarkers, matrix).subscribe(()=> {
         this.taskService.getSolution(taskId).subscribe((solution) => {
-
+          this.taskLoading = false;
           this.showSolution(solution)
         })
-      );
+      });
     })
     
   }

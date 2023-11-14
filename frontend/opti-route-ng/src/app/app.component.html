@@ -34,8 +34,25 @@
       </li>
     </ul>
     
-    <div class="mt-auto"><button class="btn btn-success" [disabled]="!taskDataIsReady()" (click)="sendTask()">Send Task</button></div>
-    
+    <!-- <div class="mt-auto">
+      <button class="btn btn-success" [disabled]="!taskDataIsReady()" (click)="sendTask()">Send Task</button> 
+    </div> -->
+    <div class="mt-auto">
+      <button class="btn btn-success btn-lg" [disabled]="!taskDataIsReady()" (click)="sendTask()">
+        <ng-container *ngIf="!taskLoading">
+          Send Task
+        </ng-container>
+        <ng-container *ngIf="taskLoading">
+          <span class="spinner-border spinner-border-sm"></span>
+          Loading...
+        </ng-container>
+        
+      </button> 
+    </div>
+    <!-- <button class="btn btn-success" type="button" disabled>
+      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+      Loading...
+    </button> -->
   </div>
   <div class="col" *ngIf="gMapsService.apiLoaded| async">
     <google-map  height="100%" width="100%" [options]="options" (mapClick)="addMarker($event)">
