@@ -89,15 +89,12 @@ class STabuSearch(Algorithm):
         self.vehicles = task.vehicles
         self.distances = task.distance_matrix
 
-
         vehicles_to_places_dict = {}
 
         if len(self.vehicles) == 0:
             solution = Solution(task, vehicles_to_places_dict)
             print("No vehicles!")
             return solution
-
-        self.capacity: int = self.vehicles[0].capacity  # TODO
 
         # starting from depot
         for vehicle in self.vehicles:
@@ -180,8 +177,8 @@ class STabuSearch(Algorithm):
             for i2, v2 in enumerate(routes[r2]):
                 sol = InsertMove(r1, r2, v1, i2)
                 solutions.append(sol)
-                # sol = SwapMove(r1, r2, v1, v2, i1, i2)
-                # solutions.append(sol) # it's slow
+                sol = SwapMove(r1, r2, v1, v2, i1, i2)
+                solutions.append(sol)  # comment it if slow
             sol = InsertMove(r1, r2, v1, None)
             solutions.append(sol)
         return solutions
@@ -191,7 +188,7 @@ class STabuSearch(Algorithm):
             return 0
         weight = 0
         cap_overload = 0
-        for route in solution:
+        for vehicle_ind, route in enumerate(solution):
             if len(route) == 0:
                 continue
             u = route[0]
@@ -200,8 +197,9 @@ class STabuSearch(Algorithm):
                 weight += self.distances[self.clients[u].place_index][self.clients[node].place_index]
                 u = node
             # weight += = self.distances[self.clients[u].place_index][self.depot.place_index]
-            cap_overload += self.calc_capacity(route, self.capacity)
-        return - (weight + cap_overload * self.CAP_OVERLOAD_PENALTY)
+            #   ^^^ better vehicle spread if commented
+            cap_overload += self.calc_capacity(route, self.vehicles[vehicle_ind].capacity)
+        return - (weight + weight * cap_overload * self.CAP_OVERLOAD_PENALTY)
 
     def calc_capacity(self, route, capacity):
         if not self.use_capacity:
@@ -213,8 +211,8 @@ class STabuSearch(Algorithm):
             return current_capacity - capacity
         return 0
 
-    def check_capacity_valid(self, route, capacity):
-        return self.calc_capacity(route, capacity) <= 0
+    # def check_capacity_valid(self, route, capacity):
+    #     return self.calc_capacity(route, capacity) <= 0
 
 
     def get_demand(self, v):
