@@ -62,7 +62,7 @@ export class AppComponent implements OnInit {
       })  
       this.gMapsService.loadRoute(placesLatLng).subscribe(r => {
         this.directionsResults.push(r);
-        this.directionsRendererOptions.push({markerOptions:{visible: false}, polylineOptions: {strokeColor: color, strokeOpacity: 0.5}});
+        this.directionsRendererOptions.push({markerOptions:{visible: false}, polylineOptions: {strokeColor: color, strokeOpacity: 0.5, strokeWeight: 5}});
       })
       
     })
@@ -115,6 +115,7 @@ export class AppComponent implements OnInit {
     this.gMapsService.getGeoInfo(m.latLng).subscribe((r) => {
       m.placeId = r.results[0].place_id;
       m.latLng = r.results[0].geometry.location;
+      m.description = r.results[0].formatted_address;
     }
     
     )

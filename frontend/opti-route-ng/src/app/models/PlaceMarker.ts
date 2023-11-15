@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 export class PlaceMarker{
     uuid: string;
     placeId: string = '';
+    description: string = '';
     latLng: google.maps.LatLng;
     type: PlaceType;
     demand: number;

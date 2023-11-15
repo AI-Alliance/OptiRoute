@@ -7,17 +7,39 @@
       <button type="button" class="btn btn-outline-primary" [class.active]="selectedType == PlaceType.CLIENT" (click)="selectedType = PlaceType.CLIENT">Client</button>
     </div>
 
-    <div class="mt-5">
-      <div class="h2">Vehicles
-        <button class="btn btn-secondary" (click)="addVehicle()">
-          +
-        </button>
-        
-      </div>
+  
+    <div class="mt-5 h2 position-relative ">Places:
+      <span *ngIf="!placeMarkers.length" class="position-absolute top-0 start-100 translate-middle p-2  bg-danger border border-light rounded-circle">
+      </span>
+    </div>
+    <ul class="list-group w-100">
+      <li class="list-group-item" *ngFor="let pm of placeMarkers">
+        <div class="form-group row" >
+          <label >{{pm.type.toUpperCase()}}</label>
+          <div class="col text-muted">
+            {{pm.description}} 
+          </div>
+          <div class="col-4" *ngIf="pm.type == PlaceType.CLIENT">
+            Demand: {{pm.demand}}
+          </div>
+          
+        </div>
+      </li>
+    </ul>
+
+    
+    <div class="mt-5 h2">Vehicles:
+      <button class="btn btn-secondary position-relative" (click)="addVehicle()">
+        <span *ngIf="!vehicles.length" class="position-absolute top-0 start-100 translate-middle p-2  bg-danger border border-light rounded-circle">
+        </span>
+        <span class="h5">Add vehicle</span>
+      </button>
+      
     </div>
     
-    <ul class="list-group"*ngFor="let vehicle of vehicles">
-      <li class="list-group-item">
+    
+    <ul class="list-group">
+      <li class="list-group-item" *ngFor="let vehicle of vehicles">
         <div class="form-group row" >
           <small class="text-muted">{{vehicle.uuid}}</small>
           
