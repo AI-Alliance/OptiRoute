@@ -3,6 +3,7 @@ from flask import request
 from flask import jsonify
 from flask_cors import CORS, cross_origin
 
+from logic.algorithms import AlgorithmType
 from logic import Task
 from logic import RequestToTaskConverter
 from logic import RandomAlgorithm
@@ -30,6 +31,13 @@ def submit_task():
     task = RequestToTaskConverter.convert(request_dict)
     taskService.add(task)
     return ""
+
+@app.route("/algorithms", methods=['GET'])
+@cross_origin()
+def get_algorithms():
+    algorithm_types = [algorithm_type.name for algorithm_type in AlgorithmType]
+    return jsonify({"algorithms": list(algorithm_types)})
+
 
 
 @app.route("/tasks", methods=['GET'])

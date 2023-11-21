@@ -121,7 +121,7 @@ class STabuSearch(Algorithm):
             vehicles_id_to_places_id_dict[vehicle_id] = [place.place_id for place in places_list]
         solution = Solution(task, vehicles_id_to_places_id_dict)
 
-        print("Problem Solved!")
+        print("Problem Solved by Tabu!")
         return solution
 
     def search(self):

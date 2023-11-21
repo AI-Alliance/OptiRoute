@@ -9,3 +9,5 @@ class Service(ABC):
     @abstractmethod
     def get_all(self):
         pass
+
+
