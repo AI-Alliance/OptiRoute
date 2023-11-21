@@ -21,6 +21,11 @@ import { FileService } from './services/file.service';
 export class AppComponent implements OnInit {
   PlaceType: typeof PlaceType = PlaceType;
   selectedType: PlaceType = PlaceType.DEPOT;
+
+  algorithms: string[] = [];
+
+  selectedAlgorithm: string = '';
+
   taskLoading: boolean = false;
   
   options: google.maps.MapOptions = {
@@ -92,8 +97,7 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    
-  
+    this.taskService.getAlgorithms().subscribe((algorithms) => this.algorithms = algorithms);
   }
 
  
@@ -161,7 +165,7 @@ export class AppComponent implements OnInit {
   }
 
   taskDataIsReady(){
-    return this.vehicles.length && (this.placeMarkers.length > 1) && this.hasDepotMarker()
+    return this.vehicles.length && (this.placeMarkers.length > 1) && this.hasDepotMarker() && this.selectedAlgorithm.length;
   }
 
   sendTask(){
@@ -171,7 +175,7 @@ export class AppComponent implements OnInit {
       }
       let taskId = uuidv4();
       this.taskLoading = true;
-      this.taskService.sendTask(taskId, this.vehicles, this.placeMarkers, matrix).subscribe(()=> {
+      this.taskService.sendTask(taskId, this.vehicles, this.placeMarkers, this.selectedAlgorithm, matrix).subscribe(()=> {
         this.taskService.getSolution(taskId).subscribe((solution) => {
           this.taskLoading = false;
           this.showSolution(solution)

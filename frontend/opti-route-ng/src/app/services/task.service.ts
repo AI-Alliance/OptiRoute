@@ -4,7 +4,7 @@ import { environment } from 'src/environments/environment';
 import { Vehicle } from '../models/Vehicle';
 import { PlaceMarker } from '../models/PlaceMarker';
 import { v4 as uuidv4 } from 'uuid';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { Solution } from '../models/Solution';
 
 @Injectable({
@@ -14,6 +14,10 @@ export class TaskService {
 
   constructor(private httpClient: HttpClient) { 
     
+  }
+
+  getAlgorithms(){
+    return this.httpClient.get<{algorithms: string[]}>(environment.backendAddress + '/algorithms').pipe(map(response => response.algorithms));
   }
 
   getSolution(taskId: string){
@@ -30,7 +34,7 @@ export class TaskService {
     })
   }
 
-  sendTask(taskId:string, vehicles: Vehicle[], places: PlaceMarker[], matrix: google.maps.DistanceMatrixResponse){
+  sendTask(taskId:string, vehicles: Vehicle[], places: PlaceMarker[], algorithm: string, matrix: google.maps.DistanceMatrixResponse){
     let placesToSend = [];
 
     for(let i = 0; i < places.length; i++){
@@ -57,6 +61,7 @@ export class TaskService {
       task_id: taskId,
       places: placesToSend,
       vehicles: vehiclesToSend,
+      algorithm_type: algorithm,
       rows: matrixToSend
     });
   }

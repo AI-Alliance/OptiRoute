@@ -56,10 +56,15 @@
       </li>
     </ul>
     
-    <!-- <div class="mt-auto">
-      <button class="btn btn-success" [disabled]="!taskDataIsReady()" (click)="sendTask()">Send Task</button> 
-    </div> -->
-    <div class="w-100 d-flex justify-content-around mt-auto">
+    <div class="mt-auto w-100">
+      <select class="form-select" (change)="selectedAlgorithm = $any($event.target).value">
+        <option [value]="''" >Select algorithm</option>
+        <option [value]="algorithm" *ngFor="let algorithm of algorithms">{{algorithm}}</option>
+      </select>
+    </div>
+    
+    
+    <div class="w-100 d-flex justify-content-between mt-5">
       
       <button class="btn btn-success btn-lg" [disabled]="!taskDataIsReady()" (click)="sendTask()">
         <ng-container *ngIf="!taskLoading">
