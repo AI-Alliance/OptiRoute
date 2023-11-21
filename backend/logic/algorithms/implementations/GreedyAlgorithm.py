@@ -55,7 +55,7 @@ class GreedyAlgorithm(Algorithm):
         for vehicle_id, places_list in vehicles_id_to_places_dict.items():
             vehicles_id_to_places_id_dict[vehicle_id] = [place.place_id for place in places_list]
         solution = Solution(task, vehicles_id_to_places_id_dict)
-        print("Problem Solved by greedy algorithms!")
+        print("Problem Solved by greedy algorithms")
         return solution
 
     def solve_greedy(self):

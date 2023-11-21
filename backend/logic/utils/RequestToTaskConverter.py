@@ -1,6 +1,7 @@
 import numpy as np
 from logic import Task, TaskBuilder
 from logic.algorithms import AlgorithmType
+from logic.algorithms.implementations import GreedyAlgorithm
 from logic.models import Place
 
 from logic.models.Vehicle import Vehicle
@@ -14,7 +15,10 @@ class RequestToTaskConverter:
         rows_list: list = request_dict['rows']
         places_dict_list: list = request_dict['places']
         vehicles_dict_list: list = request_dict['vehicles']
-        algorithm_type = AlgorithmType[request_dict['algorithm_type']]
+
+        algorithm_type = AlgorithmType[request_dict.get('algorithm_type', AlgorithmType.GREEDY.name)]
+
+
         places = RequestToTaskConverter.__get_models_from_dictionary(places_dict_list, Place)
         vehicles = RequestToTaskConverter.__get_models_from_dictionary(vehicles_dict_list, Vehicle)
         distance_matrix = RequestToTaskConverter.__rows_list_to_distance_matrix(rows_list)
