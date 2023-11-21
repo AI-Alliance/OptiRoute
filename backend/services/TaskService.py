@@ -1,6 +1,6 @@
 from logic import Task, AlgorithmManager, RandomAlgorithm
 from logic.Solution import Solution
-from logic.algorithms.implementations import GreedyAlgorithm
+from logic.algorithms.implementations import GreedyAlgorithm, STabuSearch
 
 from services.Service import Service
 from services.SolutionService import SolutionService
@@ -11,7 +11,8 @@ class TaskService(Service):
     def __init__(self, solution_service: SolutionService):
         self.solution_service = solution_service
         self.tasks: list[Task] = []
-        self.algorithm_manager = AlgorithmManager(algorithm=GreedyAlgorithm())
+        # self.algorithm_manager = AlgorithmManager(algorithm=GreedyAlgorithm())
+        self.algorithm_manager = AlgorithmManager(algorithm=STabuSearch())
 
     def add(self, task: Task) -> None:
         self.tasks.append(task)
