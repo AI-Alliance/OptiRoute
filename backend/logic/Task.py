@@ -1,5 +1,7 @@
 import uuid
 
+from logic.algorithms import AlgorithmType
+
 
 class Task:
     def __init__(self):
@@ -7,12 +9,15 @@ class Task:
         self._distance_matrix = None
         self._places: list = []
         self._vehicles: list = []
+        self._algorithm_type: AlgorithmType = None
         print("Task created!")
 
     @property
     def id(self):
         return self._id
-
+    @property
+    def algorithm_type(self):
+        return self._algorithm_type
     @property
     def distance_matrix(self):
         return self._distance_matrix
@@ -50,6 +55,8 @@ class TaskBuilder:
     def set_vehicles(self, vehicles: list):
         self.task._vehicles = vehicles
         return self
-
+    def set_algorithm_type(self, algorithm_type:AlgorithmType):
+        self.task._algorithm_type = algorithm_type
+        return self
     def get_task(self) -> Task:
         return self.task
