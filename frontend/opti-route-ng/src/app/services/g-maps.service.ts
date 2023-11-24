@@ -4,6 +4,7 @@ import { MapDirectionsService, MapGeocoder, MapGeocoderResponse } from '@angular
 import { Observable, catchError, forkJoin, map, of } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { PlaceMarker } from '../models/PlaceMarker';
+import { DistanceMatrix } from '../models/DistanceMatrix';
 
 @Injectable({
   providedIn: 'root'
@@ -63,29 +64,71 @@ export class GMapsService {
     return this.mapDirectionsService.route(request).pipe(map(response => response.result));
   }
 
-  getDistMatrix(placeMarkers: PlaceMarker[]){
+  getDistMatrix(placeMarkers: PlaceMarker[]): Observable<DistanceMatrix>{    
 
-    // for (const placeMarker of placeMarkers) {
-    //   this.getGeoInfo(placeMarker).subscribe((r) => placeMarker.placeId = r.results[0].place_id)
-    // }
+    if(placeMarkers.length <= 10){
+      return this.getOneRequestMatrix(placeMarkers, placeMarkers);
+    }
 
-   
-    return new Observable<google.maps.DistanceMatrixResponse | null>((observer) => {
+    
+    return this.getCompositionMatrix(placeMarkers);
+  }
+
+  getOneRequestMatrix(origins: PlaceMarker[], destinations: PlaceMarker[]): Observable<DistanceMatrix>{
+    return (new Observable<DistanceMatrixResponse>((observer) => {
+      console.log('origins', origins);
+      console.log('destinations', destinations);
       this.distanceMatrixService?.getDistanceMatrix(
         {
-          origins: placeMarkers.map(m => m.latLng),
-          destinations: placeMarkers.map(m => m.latLng),
+          origins: origins.map(m => m.latLng),
+          destinations: destinations.map(m => m.latLng),
           travelMode: google.maps.TravelMode.DRIVING
         },
         (response: google.maps.DistanceMatrixResponse | null, status: google.maps.DistanceMatrixStatus) => {
-          console.log(status);
-          observer.next(response);
+          
+          observer.next({response, status});
           observer.complete()
         },
       )
-    })
-
-
+    })).pipe(this.googleMatrixToDistanceMatrixMapper());
   }
 
+  googleMatrixToDistanceMatrixMapper(){
+    return map( (distanceMatrixResponse: DistanceMatrixResponse) => {
+      if(!distanceMatrixResponse.response){
+        throw new Error(distanceMatrixResponse.status);
+      }
+      let googleMatrix: google.maps.DistanceMatrixResponse = distanceMatrixResponse.response;
+      let matrix: DistanceMatrix = { rows: []};
+      for (const row of googleMatrix.rows){
+        matrix.rows.push({elements: row.elements.map(e => e.duration.value)});
+      }
+      return matrix;
+    })
+  }
+
+  getCompositionMatrix(placeMarkers: PlaceMarker[]): Observable<DistanceMatrix>{
+    let observers: Observable<DistanceMatrix>[] = []
+
+    placeMarkers.forEach( p => {
+      observers.push(this.getOneRequestMatrix([p], placeMarkers));
+    })
+
+    return forkJoin(observers).pipe( map(responses => {
+      let matrix: DistanceMatrix = { rows: []};
+      for (const m of responses) {
+        matrix.rows.push(m.rows[0]);
+      }
+
+      return matrix;
+    }))
+  }
+
+
+
+}
+
+interface DistanceMatrixResponse{
+  response: google.maps.DistanceMatrixResponse | null,
+  status: google.maps.DistanceMatrixStatus
 }

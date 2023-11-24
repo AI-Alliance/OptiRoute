@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Solution } from './models/Solution';
 import { FileService } from './services/file.service';
 import { MapRoute } from './models/MapRoute';
+import { DistanceMatrix } from './models/DistanceMatrix';
 
 
 
@@ -63,7 +64,6 @@ export class AppComponent implements OnInit {
         placesLatLng.push(r.results[0].geometry.location);
       })  
       this.gMapsService.loadRoute(placesLatLng).subscribe(r => {
-        console.log(r);
         if(!r){
           console.error('Undefined route');
           return;
@@ -181,7 +181,7 @@ export class AppComponent implements OnInit {
   }
 
   sendTask(){
-    this.gMapsService.getDistMatrix(this.placeMarkers).subscribe((matrix: google.maps.DistanceMatrixResponse | null) => {
+    this.gMapsService.getDistMatrix(this.placeMarkers).subscribe((matrix: DistanceMatrix) => {
       if(!matrix){
         return;
       }

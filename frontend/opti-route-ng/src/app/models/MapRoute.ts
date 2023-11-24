@@ -8,6 +8,5 @@ export class MapRoute{
         for (const leg of this.directions.routes[0].legs) {
             this.totalDurationSeconds+= leg.duration?.value ?? 0;
         }
-        console.log(this.totalDurationSeconds / 60);
     }
 }

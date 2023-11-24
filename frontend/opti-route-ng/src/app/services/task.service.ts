@@ -6,6 +6,7 @@ import { PlaceMarker } from '../models/PlaceMarker';
 import { v4 as uuidv4 } from 'uuid';
 import { Observable, map } from 'rxjs';
 import { Solution } from '../models/Solution';
+import { DistanceMatrix } from '../models/DistanceMatrix';
 
 @Injectable({
   providedIn: 'root'
@@ -34,7 +35,7 @@ export class TaskService {
     })
   }
 
-  sendTask(taskId:string, vehicles: Vehicle[], places: PlaceMarker[], algorithm: string, matrix: google.maps.DistanceMatrixResponse){
+  sendTask(taskId:string, vehicles: Vehicle[], places: PlaceMarker[], algorithm: string, matrix: DistanceMatrix){
     let placesToSend = [];
 
     for(let i = 0; i < places.length; i++){
@@ -45,14 +46,14 @@ export class TaskService {
     let vehiclesToSend = vehicles.map((v)=> {return {vehicle_id: v.uuid, capacity: v.capacity}});
     
     
-    let matrixToSend = [];
+    // let matrixToSend = [];
 
-    for (const row of matrix.rows) {
+    // for (const row of matrix.rows) {
 
-      let elements: number[] = row.elements.map(e=> e.duration.value)
+    //   let elements: number[] = row.elements.map(e=> e.duration.value)
 
-      matrixToSend.push({elements: elements})
-    }
+    //   matrixToSend.push({elements: elements})
+    // }
 
 
 
@@ -62,7 +63,7 @@ export class TaskService {
       places: placesToSend,
       vehicles: vehiclesToSend,
       algorithm_type: algorithm,
-      rows: matrixToSend
+      rows: matrix.rows
     });
   }
 }
