@@ -19,9 +19,9 @@ class GreedyAlgorithm(Algorithm):
         vehicles_id_to_places_dict = {}
 
         # starting from depot
-        for vehicle in vehicles:
-            vehicles_id_to_places_dict[vehicle.vehicle_id] = [depot]
-
+        # for vehicle in vehicles:
+        #     vehicles_id_to_places_dict[vehicle.vehicle_id] = [depot]
+        self.start_in_depo(depot, vehicles, vehicles_id_to_places_dict)
         while len(unvisited_clients) != 0:
             shortest_distance = float('inf')
             best_pair = (None, None)
@@ -44,16 +44,15 @@ class GreedyAlgorithm(Algorithm):
                 break
 
         # finishing in depot
-        for vehicle in vehicles:
-            route: list = vehicles_id_to_places_dict[vehicle.vehicle_id]
-            if len(route) <= 1:
-                vehicles_id_to_places_dict[vehicle.vehicle_id] = []
-            else:
-                vehicles_id_to_places_dict[vehicle.vehicle_id].append(depot)
+        self.finish_in_depo(depot, vehicles,vehicles_id_to_places_dict )
+        # for vehicle in vehicles:
+        #     route: list = vehicles_id_to_places_dict[vehicle.vehicle_id]
+        #     if len(route) <= 1:
+        #         vehicles_id_to_places_dict[vehicle.vehicle_id] = []
+        #     else:
+        #         vehicles_id_to_places_dict[vehicle.vehicle_id].append(depot)
 
-        vehicles_id_to_places_id_dict = {}
-        for vehicle_id, places_list in vehicles_id_to_places_dict.items():
-            vehicles_id_to_places_id_dict[vehicle_id] = [place.place_id for place in places_list]
-        solution = Solution(task, vehicles_id_to_places_id_dict)
+
+        solution = Solution(task, vehicles_id_to_places_dict)
         print("Problem Solved by greedy algorithms")
         return solution

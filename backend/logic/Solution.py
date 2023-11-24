@@ -6,10 +6,11 @@ from .utils import get_place_by_id, calculate_distance
 
 
 class Solution:
-    def __init__(self, task: Task, vehicles_to_places_dict: dict):
+    def __init__(self, task: Task, vehicles_id_to_places_dict: dict):
         self._id: str = str(uuid.uuid4())
         self._task: Task = task
-        self._vehicle_route_dicts_list: list = self.create_vehicle_route_dictionaries_list(vehicles_to_places_dict)
+        vehicles_id_to_places_id_dict = self.get_vehicles_id_to_places_id_dict(vehicles_id_to_places_dict)
+        self._vehicle_route_dicts_list: list = self.create_vehicle_route_dictionaries_list(vehicles_id_to_places_id_dict)
 
         print("Solution created")
 
@@ -42,6 +43,7 @@ class Solution:
             dicts_list.append(vehicle_route_dict)
 
         return dicts_list
+
     def places_to_dict(self, places):
         return [place.to_dict()
                 for place in places]
@@ -52,9 +54,15 @@ class Solution:
 
     def get_duration_sum(self, places: list[Place]) -> int:
         duration_sum: int = 0
-        for i in range(len(places)-1):
+        for i in range(len(places) - 1):
             place1 = places[i]
-            place2 = places[i+1]
+            place2 = places[i + 1]
             duration_sum += calculate_distance(self.task.distance_matrix, place1, place2)
         return duration_sum
 
+    def get_vehicles_id_to_places_id_dict(self, vehicles_id_to_places_dict: dict):
+        vehicles_id_to_places_id_dict = {}
+        for vehicle_id, places_list in vehicles_id_to_places_dict.items():
+            vehicles_id_to_places_id_dict[vehicle_id] \
+                = [place.place_id for place in places_list]
+        return vehicles_id_to_places_id_dict
