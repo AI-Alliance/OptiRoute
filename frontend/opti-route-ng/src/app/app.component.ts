@@ -85,11 +85,11 @@ export class AppComponent implements OnInit {
 
     this.clearRoutes();
     for (const vehicle of solution.vehicles) {
-      for(let i = 0; i < vehicle.route.length; i++){
-        this.placeMarkers.find((m) => (m.placeId == vehicle.route[i].place_id) && (m.type == PlaceType.CLIENT))?.setText(i.toString());
+      for(let i = 0; i < vehicle.route.places.length; i++){
+        this.placeMarkers.find((m) => (m.placeId == vehicle.route.places[i].place_id) && (m.type == PlaceType.CLIENT))?.setText(i.toString());
       }
 
-      this.loadRoute(vehicle.route.map((p)=> p.place_id), colors.pop() ?? 'black');
+      this.loadRoute(vehicle.route.places.map((p)=> p.place_id), colors.pop() ?? 'black');
     }
 
   }

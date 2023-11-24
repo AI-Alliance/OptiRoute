@@ -12,7 +12,7 @@
       <span *ngIf="!placeMarkers.length" class="position-absolute top-0 start-100 translate-middle p-2  bg-danger border border-light rounded-circle">
       </span>
     </div>
-    <ul class="list-group w-100">
+    <ul class="list-group w-100  overflow-auto" style="height: 300px;">
       <li class="list-group-item" *ngFor="let pm of placeMarkers">
         <div class="form-group row" >
           <label >{{pm.type.toUpperCase()}}</label>
@@ -37,8 +37,7 @@
       
     </div>
     
-    
-    <ul class="list-group">
+    <ul class="list-group overflow-auto" style="height: 300px;">
       <li class="list-group-item" *ngFor="let vehicle of vehicles">
         <div class="form-group row" >
           <small class="text-muted">{{vehicle.uuid}}</small>
@@ -55,6 +54,7 @@
         </div>
       </li>
     </ul>
+    
     
     <div class="mt-auto w-100">
       <select class="form-select" (change)="selectedAlgorithm = $any($event.target).value">
