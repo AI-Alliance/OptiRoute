@@ -4,15 +4,16 @@ import { environment } from 'src/environments/environment';
 import { Vehicle } from '../models/Vehicle';
 import { PlaceMarker } from '../models/PlaceMarker';
 import { v4 as uuidv4 } from 'uuid';
-import { Observable, map } from 'rxjs';
+import { Observable, map, switchMap } from 'rxjs';
 import { Solution } from '../models/Solution';
+import { GMapsService } from './g-maps.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TaskService {
 
-  constructor(private httpClient: HttpClient) { 
+  constructor(private httpClient: HttpClient, private gMapsService: GMapsService) { 
     
   }
 
@@ -20,7 +21,20 @@ export class TaskService {
     return this.httpClient.get<{algorithms: string[]}>(environment.backendAddress + '/algorithms').pipe(map(response => response.algorithms));
   }
 
-  getSolution(taskId: string){
+  getSolution(placeMarkers: PlaceMarker[], vehicles: Vehicle[], algorithm: string): Observable<Solution>{
+    return this.gMapsService.getDistMatrix(placeMarkers).pipe(
+      switchMap((matrix) => {
+        let taskId = uuidv4();
+        return this.sendTask(taskId, vehicles, placeMarkers, algorithm, matrix).pipe(
+          switchMap( () => {
+            return this.pollSolution(taskId);
+          })
+        )
+      })
+    )
+  }
+
+  private pollSolution(taskId: string){
 
 
     return new Observable<Solution>((observer) => {
@@ -34,7 +48,7 @@ export class TaskService {
     })
   }
 
-  sendTask(taskId:string, vehicles: Vehicle[], places: PlaceMarker[], algorithm: string, matrix: number[][]){
+  private sendTask(taskId:string, vehicles: Vehicle[], places: PlaceMarker[], algorithm: string, matrix: number[][]){
     let placesToSend = [];
 
     for(let i = 0; i < places.length; i++){

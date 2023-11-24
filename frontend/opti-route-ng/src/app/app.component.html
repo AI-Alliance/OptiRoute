@@ -70,7 +70,7 @@
     
     <div class="w-100 d-flex justify-content-between mt-5">
       
-      <button class="btn btn-success btn-lg" [disabled]="!taskDataIsReady()" (click)="sendTask()">
+      <button class="btn btn-success btn-lg" [disabled]="!taskDataIsReady()" (click)="getSolution()">
         <ng-container *ngIf="!taskLoading">
           Send Task
         </ng-container>

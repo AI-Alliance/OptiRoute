@@ -64,19 +64,11 @@ export class GMapsService {
   }
 
   getDistMatrix(placeMarkers: PlaceMarker[]): Observable<number[][]>{    
-
-    return this.getOneRequestMatrix(placeMarkers, placeMarkers);
-    // let observers: Observable<number[][]>[] = []
-
-
-    // return forkJoin(observers).pipe( );
-  
+    return this.getOneRequestMatrix(placeMarkers, placeMarkers);  
   }
 
   private getOneRequestMatrix(origins: PlaceMarker[], destinations: PlaceMarker[]): Observable<number[][]>{
     return (new Observable<DistanceMatrixResponse>((observer) => {
-      console.log('origins', origins);
-      console.log('destinations', destinations);
       this.distanceMatrixService?.getDistanceMatrix(
         {
           origins: origins.map(m => m.latLng),

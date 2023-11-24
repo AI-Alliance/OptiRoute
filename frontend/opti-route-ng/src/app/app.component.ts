@@ -179,21 +179,13 @@ export class AppComponent implements OnInit {
     return this.vehicles.length && (this.placeMarkers.length > 1) && this.hasDepotMarker() && this.selectedAlgorithm.length;
   }
 
-  sendTask(){
-    this.gMapsService.getDistMatrix(this.placeMarkers).subscribe((matrix: number[][]) => {
-      if(!matrix){
-        return;
-      }
-      let taskId = uuidv4();
-      this.taskLoading = true;
-      this.taskService.sendTask(taskId, this.vehicles, this.placeMarkers, this.selectedAlgorithm, matrix).subscribe(()=> {
-        this.taskService.getSolution(taskId).subscribe((solution) => {
-          this.taskLoading = false;
-          this.showSolution(solution)
-        })
-      });
-    })
-    
+  getSolution(){
+    this.taskLoading = true;
+
+    this.taskService.getSolution(this.placeMarkers, this.vehicles, this.selectedAlgorithm).subscribe(solution => {
+      this.showSolution(solution);
+      this.taskLoading = false;
+    })    
   }
 
   onFileSelect(event: any){
