@@ -57,24 +57,3 @@ class GreedyAlgorithm(Algorithm):
         solution = Solution(task, vehicles_id_to_places_id_dict)
         print("Problem Solved by greedy algorithms")
         return solution
-
-    def solve_greedy(self):
-        while (self._unvisited_clients):
-            shortest_distance = float('inf')
-            best_pair = (None, None)
-            for vehicle in self._vehicles:
-                last_place_visited_by_vehicle = vehicle.get_last_client()
-                for client in self._unvisited_clients:
-                    possible_distance = client.distance_to_place(last_place_visited_by_vehicle)
-                    if vehicle.get_capacity() >= client.get_demand() and possible_distance < shortest_distance:
-                        best_pair = (vehicle, client)
-                        shortest_distance = possible_distance
-            if best_pair[0] != None:
-                best_vehicle = best_pair[0]
-                best_client = best_pair[1]
-                best_vehicle.visit_place(best_client)
-                self._unvisited_clients.remove(best_client)
-            else:
-                break
-        for vehicle in self._vehicles:
-            vehicle.visit_place(self.depo)
