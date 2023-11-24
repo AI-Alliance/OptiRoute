@@ -136,7 +136,12 @@ export class AppComponent implements OnInit {
       m.latLng = r.results[0].geometry.location;
       m.description = r.results[0].formatted_address;
     })
-    this.placeMarkers.push(m);
+
+    if(type == PlaceType.DEPOT){
+      this.placeMarkers.unshift(m);
+    } else {
+      this.placeMarkers.push(m);
+    }
 
   }
 
