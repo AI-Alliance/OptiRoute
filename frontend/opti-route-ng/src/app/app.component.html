@@ -62,6 +62,10 @@
         <option [value]="algorithm" *ngFor="let algorithm of algorithms">{{algorithm}}</option>
       </select>
     </div>
+    <div>
+      avg: {{solutionsStats.avg}}
+      max: {{solutionsStats.max}}
+    </div>
     
     
     <div class="w-100 d-flex justify-content-between mt-5">
@@ -105,8 +109,8 @@
         <button *ngIf="lastMarker" (click)="deleteMarker(lastMarker)" class="btn btn-sm btn-danger">Delete marker</button>
         <button *ngIf="lastMarker" (click)="getGeoInfo(lastMarker)" class="btn btn-sm btn-info">Info</button>
       </map-info-window>
-      <ng-container *ngFor="let dr of directionsResults; index as i ">
-        <map-directions-renderer *ngIf="dr" [directions]="dr" [options]="directionsRendererOptions[i]"></map-directions-renderer>
+      <ng-container *ngFor="let route of routes">
+        <map-directions-renderer [directions]="route.directions" [options]="route.options"></map-directions-renderer>
       </ng-container>
     </google-map>
     

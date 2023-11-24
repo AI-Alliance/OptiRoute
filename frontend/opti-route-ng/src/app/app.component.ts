@@ -10,6 +10,7 @@ import { GMapsService } from './services/g-maps.service';
 import { v4 as uuidv4 } from 'uuid';
 import { Solution } from './models/Solution';
 import { FileService } from './services/file.service';
+import { MapRoute } from './models/MapRoute';
 
 
 
@@ -47,16 +48,12 @@ export class AppComponent implements OnInit {
     
   }
 
-
-  directionsResults: Array<google.maps.DirectionsResult | undefined> = [];
-  directionsOrder = [];
-  directionsRendererOptions: google.maps.DirectionsRendererOptions[] = []; 
+  routes: MapRoute[]=[];
   loadRoute(placesId:string[], color: string){
     
     let placesLatLng: google.maps.LatLng[] = [];
     let observers: Observable<MapGeocoderResponse>[] = []
     for (const placeId of placesId) {
-
       observers.push(
         this.gMapsService.getGeoInfoById(placeId)
       )
@@ -66,19 +63,20 @@ export class AppComponent implements OnInit {
         placesLatLng.push(r.results[0].geometry.location);
       })  
       this.gMapsService.loadRoute(placesLatLng).subscribe(r => {
-        this.directionsResults.push(r);
-        this.directionsRendererOptions.push({markerOptions:{visible: false}, polylineOptions: {strokeColor: color, strokeOpacity: 0.5, strokeWeight: 5}});
+        console.log(r);
+        if(!r){
+          console.error('Undefined route');
+          return;
+        }
+        this.routes.push(new MapRoute(r,{markerOptions:{visible: false}, polylineOptions: {strokeColor: color, strokeOpacity: 0.5, strokeWeight: 5}}));
+        this.updateSolutionsStats();
       })
       
     })
   }
 
   clearRoutes(){
-    this.directionsRendererOptions = [];
-    this.directionsResults = [];
-  }
-
-  refreshMarkersText(){
+    this.routes = []
     this.placeMarkers.forEach(m => m.setText(null));
   }
 
@@ -86,7 +84,6 @@ export class AppComponent implements OnInit {
     let colors = ['red', 'green', 'purple'];
 
     this.clearRoutes();
-    this.refreshMarkersText();
     for (const vehicle of solution.vehicles) {
       for(let i = 0; i < vehicle.route.length; i++){
         this.placeMarkers.find((m) => (m.placeId == vehicle.route[i].place_id) && (m.type == PlaceType.CLIENT))?.setText(i.toString());
@@ -94,13 +91,23 @@ export class AppComponent implements OnInit {
 
       this.loadRoute(vehicle.route.map((p)=> p.place_id), colors.pop() ?? 'black');
     }
+
+  }
+
+  solutionsStats: {max: number, avg: number} = {max: 0, avg: 0};
+  updateSolutionsStats(){
+    let durations = this.routes.map((r)=> r.totalDurationSeconds);
+    this.solutionsStats= {
+      max: Math.max(...durations),
+      avg: durations.reduce((a, b) => a + b, 0) / durations.length
+    };
   }
 
   ngOnInit(): void {
     this.taskService.getAlgorithms().subscribe((algorithms) => this.algorithms = algorithms);
   }
 
- 
+  
 
   getGeoInfo(marker: PlaceMarker){
     this.gMapsService.getGeoInfo(marker.latLng).subscribe((r) => console.log(r))
@@ -199,3 +206,4 @@ export class AppComponent implements OnInit {
     this.fileService.downloadInput(this.placeMarkers, this.vehicles);
   }
 }
+
