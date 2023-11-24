@@ -9,7 +9,7 @@ import { TaskService } from './services/task.service';
 import { GMapsService } from './services/g-maps.service';
 import { v4 as uuidv4 } from 'uuid';
 import { Solution } from './models/Solution';
-
+import { FileService } from './services/file.service';
 
 
 
@@ -21,6 +21,11 @@ import { Solution } from './models/Solution';
 export class AppComponent implements OnInit {
   PlaceType: typeof PlaceType = PlaceType;
   selectedType: PlaceType = PlaceType.DEPOT;
+
+  algorithms: string[] = [];
+
+  selectedAlgorithm: string = '';
+
   taskLoading: boolean = false;
   
   options: google.maps.MapOptions = {
@@ -38,7 +43,7 @@ export class AppComponent implements OnInit {
   vehicles: Vehicle[] = [];
 
 
-  constructor(private geocoder: MapGeocoder, private taskService: TaskService, protected gMapsService: GMapsService){
+  constructor(private geocoder: MapGeocoder, private taskService: TaskService, protected gMapsService: GMapsService, private fileService: FileService){
     
   }
 
@@ -92,8 +97,7 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    
-  
+    this.taskService.getAlgorithms().subscribe((algorithms) => this.algorithms = algorithms);
   }
 
  
@@ -102,7 +106,7 @@ export class AppComponent implements OnInit {
     this.gMapsService.getGeoInfo(marker.latLng).subscribe((r) => console.log(r))
   }
 
-  addMarker(event: google.maps.MapMouseEvent) {
+  onMarkerAdd(event: google.maps.MapMouseEvent) {
     if(!event.latLng){
       return;
     }
@@ -110,20 +114,26 @@ export class AppComponent implements OnInit {
     if(this.hasDepotMarker() && this.selectedType == PlaceType.DEPOT){
       return;
     }
-    let m = new PlaceMarker(event.latLng, this.selectedType);
+    this.addMarker(event.latLng, this.selectedType);
+
+    if(this.selectedType == PlaceType.DEPOT){
+      this.selectedType = PlaceType.CLIENT;
+    }
+  }
+
+  addMarker(latLng: google.maps.LatLng, type: PlaceType){
+    let m = new PlaceMarker(latLng, type);
      
     this.gMapsService.getGeoInfo(m.latLng).subscribe((r) => {
       m.placeId = r.results[0].place_id;
       m.latLng = r.results[0].geometry.location;
       m.description = r.results[0].formatted_address;
-    }
-    
-    )
+    })
     this.placeMarkers.push(m);
-    if(this.selectedType == PlaceType.DEPOT){
-      this.selectedType = PlaceType.CLIENT;
-    }
+
   }
+
+  
 
   hasDepotMarker(){
     return this.placeMarkers.find((m) => m.type == PlaceType.DEPOT);
@@ -155,7 +165,7 @@ export class AppComponent implements OnInit {
   }
 
   taskDataIsReady(){
-    return this.vehicles.length && (this.placeMarkers.length > 1) && this.hasDepotMarker()
+    return this.vehicles.length && (this.placeMarkers.length > 1) && this.hasDepotMarker() && this.selectedAlgorithm.length;
   }
 
   sendTask(){
@@ -165,7 +175,7 @@ export class AppComponent implements OnInit {
       }
       let taskId = uuidv4();
       this.taskLoading = true;
-      this.taskService.sendTask(taskId, this.vehicles, this.placeMarkers, matrix).subscribe(()=> {
+      this.taskService.sendTask(taskId, this.vehicles, this.placeMarkers, this.selectedAlgorithm, matrix).subscribe(()=> {
         this.taskService.getSolution(taskId).subscribe((solution) => {
           this.taskLoading = false;
           this.showSolution(solution)
@@ -173,5 +183,19 @@ export class AppComponent implements OnInit {
       });
     })
     
+  }
+
+  onFileSelect(event: any){
+    const file: File = event.target.files[0];
+    if(file){
+      this.fileService.readFileData(file).subscribe(data => {
+        this.placeMarkers = data.places;
+        this.vehicles = data.vehicles;
+      })
+    }
+  }
+
+  downloadInput(){
+    this.fileService.downloadInput(this.placeMarkers, this.vehicles);
   }
 }
