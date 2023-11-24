@@ -4,7 +4,6 @@ import { MapDirectionsService, MapGeocoder, MapGeocoderResponse } from '@angular
 import { Observable, catchError, forkJoin, map, of } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { PlaceMarker } from '../models/PlaceMarker';
-import { DistanceMatrix } from '../models/DistanceMatrix';
 
 @Injectable({
   providedIn: 'root'
@@ -24,7 +23,7 @@ export class GMapsService {
     );
   }
 
-  onApiLoaded(){
+  private onApiLoaded(){
     this.distanceMatrixService = new google.maps.DistanceMatrixService();
     
   }
@@ -64,17 +63,17 @@ export class GMapsService {
     return this.mapDirectionsService.route(request).pipe(map(response => response.result));
   }
 
-  getDistMatrix(placeMarkers: PlaceMarker[]): Observable<DistanceMatrix>{    
+  getDistMatrix(placeMarkers: PlaceMarker[]): Observable<number[][]>{    
 
-    if(placeMarkers.length <= 10){
-      return this.getOneRequestMatrix(placeMarkers, placeMarkers);
-    }
+    return this.getOneRequestMatrix(placeMarkers, placeMarkers);
+    // let observers: Observable<number[][]>[] = []
 
-    
-    return this.getCompositionMatrix(placeMarkers);
+
+    // return forkJoin(observers).pipe( );
+  
   }
 
-  getOneRequestMatrix(origins: PlaceMarker[], destinations: PlaceMarker[]): Observable<DistanceMatrix>{
+  private getOneRequestMatrix(origins: PlaceMarker[], destinations: PlaceMarker[]): Observable<number[][]>{
     return (new Observable<DistanceMatrixResponse>((observer) => {
       console.log('origins', origins);
       console.log('destinations', destinations);
@@ -93,38 +92,19 @@ export class GMapsService {
     })).pipe(this.googleMatrixToDistanceMatrixMapper());
   }
 
-  googleMatrixToDistanceMatrixMapper(){
+  private googleMatrixToDistanceMatrixMapper(){
     return map( (distanceMatrixResponse: DistanceMatrixResponse) => {
       if(!distanceMatrixResponse.response){
         throw new Error(distanceMatrixResponse.status);
       }
       let googleMatrix: google.maps.DistanceMatrixResponse = distanceMatrixResponse.response;
-      let matrix: DistanceMatrix = { rows: []};
+      let matrix: number[][] = [];
       for (const row of googleMatrix.rows){
-        matrix.rows.push({elements: row.elements.map(e => e.duration.value)});
+        matrix.push(row.elements.map(e => e.duration.value));
       }
       return matrix;
     })
   }
-
-  getCompositionMatrix(placeMarkers: PlaceMarker[]): Observable<DistanceMatrix>{
-    let observers: Observable<DistanceMatrix>[] = []
-
-    placeMarkers.forEach( p => {
-      observers.push(this.getOneRequestMatrix([p], placeMarkers));
-    })
-
-    return forkJoin(observers).pipe( map(responses => {
-      let matrix: DistanceMatrix = { rows: []};
-      for (const m of responses) {
-        matrix.rows.push(m.rows[0]);
-      }
-
-      return matrix;
-    }))
-  }
-
-
 
 }
 

@@ -11,7 +11,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { Solution } from './models/Solution';
 import { FileService } from './services/file.service';
 import { MapRoute } from './models/MapRoute';
-import { DistanceMatrix } from './models/DistanceMatrix';
 
 
 
@@ -181,7 +180,7 @@ export class AppComponent implements OnInit {
   }
 
   sendTask(){
-    this.gMapsService.getDistMatrix(this.placeMarkers).subscribe((matrix: DistanceMatrix) => {
+    this.gMapsService.getDistMatrix(this.placeMarkers).subscribe((matrix: number[][]) => {
       if(!matrix){
         return;
       }

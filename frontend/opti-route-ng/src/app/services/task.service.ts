@@ -6,7 +6,6 @@ import { PlaceMarker } from '../models/PlaceMarker';
 import { v4 as uuidv4 } from 'uuid';
 import { Observable, map } from 'rxjs';
 import { Solution } from '../models/Solution';
-import { DistanceMatrix } from '../models/DistanceMatrix';
 
 @Injectable({
   providedIn: 'root'
@@ -35,7 +34,7 @@ export class TaskService {
     })
   }
 
-  sendTask(taskId:string, vehicles: Vehicle[], places: PlaceMarker[], algorithm: string, matrix: DistanceMatrix){
+  sendTask(taskId:string, vehicles: Vehicle[], places: PlaceMarker[], algorithm: string, matrix: number[][]){
     let placesToSend = [];
 
     for(let i = 0; i < places.length; i++){
@@ -45,25 +44,14 @@ export class TaskService {
 
     let vehiclesToSend = vehicles.map((v)=> {return {vehicle_id: v.uuid, capacity: v.capacity}});
     
-    
-    // let matrixToSend = [];
+    let matrixToSend: {elements: number[]}[] = matrix.map(row => {return {elements: row}} );
 
-    // for (const row of matrix.rows) {
-
-    //   let elements: number[] = row.elements.map(e=> e.duration.value)
-
-    //   matrixToSend.push({elements: elements})
-    // }
-
-
-
-    // matrixToSend.forEach((r )=> r.elements.map(e=> e.duration.value))
     return this.httpClient.post(environment.backendAddress +'/tasks',{
       task_id: taskId,
       places: placesToSend,
       vehicles: vehiclesToSend,
       algorithm_type: algorithm,
-      rows: matrix.rows
+      rows: matrixToSend
     });
   }
 }
