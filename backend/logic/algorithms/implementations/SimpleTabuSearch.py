@@ -97,8 +97,9 @@ class STabuSearch(Algorithm):
             return solution
 
         # starting from depot
-        for vehicle in self.vehicles:
-            vehicles_to_places_dict[vehicle.vehicle_id] = [self.depot]
+        self.start_in_depo(self.depot, self.vehicles, vehicles_to_places_dict)
+        # for vehicle in self.vehicles:
+        #     vehicles_to_places_dict[vehicle.vehicle_id] = [self.depot]
 
         # initial solution
         self.s0 = [[] for x in self.vehicles]
@@ -113,13 +114,11 @@ class STabuSearch(Algorithm):
                 vehicles_to_places_dict[vehicle.vehicle_id].append(place)
 
         # finishing in depot
-        for vehicle in self.vehicles:
-            vehicles_to_places_dict[vehicle.vehicle_id].append(self.depot)
+        # for vehicle in self.vehicles:
+        #     vehicles_to_places_dict[vehicle.vehicle_id].append(self.depot)
+        self.finish_in_depo(self.depot, self.vehicles, vehicles_to_places_dict)
 
-        vehicles_id_to_places_id_dict = {}
-        for vehicle_id, places_list in vehicles_to_places_dict.items():
-            vehicles_id_to_places_id_dict[vehicle_id] = [place.place_id for place in places_list]
-        solution = Solution(task, vehicles_id_to_places_id_dict)
+        solution = Solution(task, vehicles_to_places_dict)
 
         print("Problem Solved by Tabu!")
         return solution
