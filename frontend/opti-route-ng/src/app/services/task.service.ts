@@ -22,7 +22,7 @@ export class TaskService {
   }
 
   getSolution(placeMarkers: PlaceMarker[], vehicles: Vehicle[], algorithm: string): Observable<Solution>{
-    return this.gMapsService.getDistMatrix(placeMarkers).pipe(
+    return this.gMapsService.getMatrix(placeMarkers).pipe(
       switchMap((matrix) => {
         let taskId = uuidv4();
         return this.sendTask(taskId, vehicles, placeMarkers, algorithm, matrix).pipe(

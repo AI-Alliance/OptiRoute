@@ -4,13 +4,14 @@ import { MapDirectionsService, MapGeocoder, MapGeocoderResponse } from '@angular
 import { Observable, catchError, forkJoin, map, of } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { PlaceMarker } from '../models/PlaceMarker';
+import * as FileSaver from 'file-saver';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GMapsService {
   apiLoaded: Observable<boolean>;
-  private distanceMatrixService: google.maps.DistanceMatrixService | undefined;
+  private distanceMatrixService!: google.maps.DistanceMatrixService;
 
   
   constructor(private httpClient: HttpClient, private  mapDirectionsService: MapDirectionsService, private geocoder: MapGeocoder) {
@@ -63,13 +64,75 @@ export class GMapsService {
     return this.mapDirectionsService.route(request).pipe(map(response => response.result));
   }
 
-  getDistMatrix(placeMarkers: PlaceMarker[]): Observable<number[][]>{    
-    return this.getOneRequestMatrix(placeMarkers, placeMarkers);  
+  getMatrix(placeMarkers: PlaceMarker[]): Observable<number[][]>{    
+    return this.getCompositionMatrix(placeMarkers);
+  }
+
+  private getCompositionMatrix(placeMarkers: PlaceMarker[]){
+    let observables: Observable<number[][]>[] = [];
+
+    const baseMatrixOrder = 10; 
+    
+    let numberOfMatricesInDemension = Math.ceil(placeMarkers.length / baseMatrixOrder);
+
+
+    for(let r=0; r<numberOfMatricesInDemension;r++){
+      for(let c=0; c<numberOfMatricesInDemension;c++){
+        observables.push(this.getOneRequestMatrix(
+          placeMarkers.slice(0 + r*baseMatrixOrder, baseMatrixOrder + r*baseMatrixOrder), placeMarkers.slice(0 + c*baseMatrixOrder, baseMatrixOrder + c*baseMatrixOrder)
+          ));
+        
+      }
+    }
+
+    return forkJoin(observables).pipe(map(matrices => {
+      let matrix: number[][] = Array.from(Array(placeMarkers.length), _ => Array(placeMarkers.length).fill(0));// zeroes
+      for(let r=0; r<numberOfMatricesInDemension;r++){
+        for(let c=0; c<numberOfMatricesInDemension;c++){
+          let matrixToInsert = matrices[r*numberOfMatricesInDemension + c];
+
+          matrix = this.insertMatrix(matrixToInsert, matrix, r*baseMatrixOrder, c*baseMatrixOrder);
+
+        }
+      }
+      // this.saveMatrix(matrix);
+      return matrix;
+    }))
+  }
+
+  private saveMatrix(matrix: number[][]){
+
+
+    let output = '';
+    for (const row of matrix) {
+      for (const col of row) {
+        output+=col + ', ';
+      }
+      output+='\n';
+    }
+    var blob = new Blob([output], {type: "text/plain;charset=utf-8"});
+    FileSaver.saveAs(blob,  "matrix.txt");
+
+  }
+
+  private insertMatrix(matrix: number[][], destination: number[][], row: number, column: number){
+    
+
+    let rows = matrix.length;
+    let cols = matrix[0].length;
+
+    for(let r=0; r<rows;r++){
+      for(let c=0; c<cols;c++){
+        destination[row+r][column + c] = matrix[r][c];
+      }
+    }
+
+    return destination;
   }
 
   private getOneRequestMatrix(origins: PlaceMarker[], destinations: PlaceMarker[]): Observable<number[][]>{
-    return (new Observable<DistanceMatrixResponse>((observer) => {
-      this.distanceMatrixService?.getDistanceMatrix(
+    return (new Observable<GoogleMatrixResponse>((observer) => {
+      this.distanceMatrixService.getDistanceMatrix(
         {
           origins: origins.map(m => m.latLng),
           destinations: destinations.map(m => m.latLng),
@@ -81,11 +144,11 @@ export class GMapsService {
           observer.complete()
         },
       )
-    })).pipe(this.googleMatrixToDistanceMatrixMapper());
+    })).pipe(this.googleMatrixToDurationMatrixMapper());
   }
 
-  private googleMatrixToDistanceMatrixMapper(){
-    return map( (distanceMatrixResponse: DistanceMatrixResponse) => {
+  private googleMatrixToDurationMatrixMapper(){
+    return map( (distanceMatrixResponse: GoogleMatrixResponse) => {
       if(!distanceMatrixResponse.response){
         throw new Error(distanceMatrixResponse.status);
       }
@@ -100,7 +163,7 @@ export class GMapsService {
 
 }
 
-interface DistanceMatrixResponse{
+interface GoogleMatrixResponse{
   response: google.maps.DistanceMatrixResponse | null,
   status: google.maps.DistanceMatrixStatus
 }
