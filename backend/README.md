@@ -10,6 +10,10 @@ flask run
 ### Run with debug (automatically reload)
 flask run --debug
 
+### Update dependencies
+
+pip3 freeze > requirements.txt
+
 ### ENDPOINTS
 
 GET, POST
