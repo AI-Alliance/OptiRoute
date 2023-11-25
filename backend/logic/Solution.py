@@ -2,16 +2,20 @@ import uuid
 
 from logic import Task
 from logic.models import Place
+from .SolutionStatus import SolutionStatus
 from .utils import get_place_by_id, calculate_distance
 
 
 class Solution:
-    def __init__(self, task: Task, vehicles_id_to_places_dict: dict):
+    def __init__(self, task: Task, vehicles_id_to_places_dict: dict, status=SolutionStatus.OK):
+        self._status: SolutionStatus = status
         self._id: str = str(uuid.uuid4())
         self._task: Task = task
-        vehicles_id_to_places_id_dict = self.get_vehicles_id_to_places_id_dict(vehicles_id_to_places_dict)
-        self._vehicle_route_dicts_list: list = self.create_vehicle_route_dictionaries_list(vehicles_id_to_places_id_dict)
-
+        if status == SolutionStatus.OK:
+            vehicles_id_to_places_id_dict = self.get_vehicles_id_to_places_id_dict(vehicles_id_to_places_dict)
+            self._vehicle_route_dicts_list: list = self.create_vehicle_route_dictionaries_list(vehicles_id_to_places_id_dict)
+        else:
+            self._vehicle_route_dicts_list = []
         print("Solution created")
 
     @property
@@ -25,6 +29,7 @@ class Solution:
     def to_dict(self) -> dict:
         return {
             "id": self.id,
+            "status": self._status.name,
             "task_id": self.task.id,
             "vehicles": self._vehicle_route_dicts_list,
             "algorithm": self.task.algorithm_type.name

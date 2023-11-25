@@ -37,13 +37,13 @@ class RequestToTaskConverter:
     def __rows_list_to_distance_matrix(rows_list: list):
         size = len(rows_list)
         matrix = np.zeros((size, size))
-        print(f"Row list:{rows_list}")
+        # print(f"Row list:{rows_list}")
         for i in range(size):
             elements = rows_list[i]['elements']
             for j in range(size):
                 element = elements[j]
                 matrix[i][j] = element
-        print(f"Matrix:{matrix}")
+        # print(f"Matrix:{matrix}")
         return matrix
 
     @staticmethod
