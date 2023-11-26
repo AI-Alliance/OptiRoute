@@ -63,7 +63,6 @@ export class AppComponent implements OnInit {
    
     this.gMapsService.apiLoaded.subscribe((loaded) => {
       this.apiLoaded = loaded;
-      console.log('loaded');
       setTimeout(() => {
         
         google.maps.importLibrary("places").then(() => {
@@ -148,7 +147,9 @@ export class AppComponent implements OnInit {
   getTotalDemand(){
     return this.placeMarkers.reduce((a, v) => a + v.demand, 0);
   }
-  
+  getTotalCapacity(){
+    return this.vehicles.reduce((a, v) => a + v.capacity, 0);
+  }
 
   getGeoInfo(marker: PlaceMarker){
     this.gMapsService.getGeoInfo(marker.latLng).subscribe((r) => console.log(r))
@@ -160,6 +161,7 @@ export class AppComponent implements OnInit {
     }
 
     if(this.generatorMode){
+      this.generatorMode = false;
       this.generatorLoading = true;
       this.gMapsService.getNerbyPlaces(event.latLng, this.generator.radius).subscribe(places => {
         places = places.splice(0, this.generator.places);
@@ -169,16 +171,14 @@ export class AppComponent implements OnInit {
           }
 
           let pM = new PlaceMarker(p.geometry?.location, PlaceType.CLIENT);
-          let d= Math.floor(Math.random() * (this.generator.max - this.generator.min) + this.generator.min);
-          console.log(d)
-          pM.demand =d;
+          pM.demand = Math.floor(Math.random() * (this.generator.max - this.generator.min) + this.generator.min);
           pM.placeId = p.place_id ?? '';
-          pM.description = p.formatted_address ?? '';
+          pM.description = p.vicinity ?? '';
           this.placeMarkers.push(pM);
         })
         this.generatorLoading = false;
       })
-
+      
       return;
     }
     

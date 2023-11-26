@@ -28,8 +28,8 @@
     </ul>
 
     
-    <div class="mt-5 h2">Vehicles:
-      <button class="btn btn-secondary position-relative" (click)="addVehicle()">
+    <div class="mt-5 h3">Vehicles {{vehicles.length}}, TC: {{getTotalCapacity()}}:
+      <button class="btn btn-secondary position-relative mt-2" (click)="addVehicle()">
         <span *ngIf="!vehicles.length" class="position-absolute top-0 start-100 translate-middle p-2  bg-danger border border-light rounded-circle">
         </span>
         <span class="h5">Add vehicle</span>
@@ -130,7 +130,7 @@
       <map-marker *ngFor="let placeMarker of placeMarkers"  [position]="placeMarker.latLng" [options]="placeMarker.markerOptions" #marker="mapMarker" (mapMouseover)="openInfoWindow(placeMarker, marker)" ></map-marker>
       <map-info-window>
         
-        <div class="my-3" (mouseleave)="this.infoWindow?.close()">
+        <div class="my-3">
           <div class="mb-2">
             {{lastMarker?.placeId}}
           </div>
