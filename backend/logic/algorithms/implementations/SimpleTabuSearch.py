@@ -1,3 +1,5 @@
+from math import inf
+from operator import itemgetter
 
 from logic import Task
 from logic.models.Place import Place
@@ -68,8 +70,31 @@ class SwapMove(Move):
                 and (self.route1, self.value2) in tabu_list)
 
 
+# class InitialBuilder:
+#     def __init__(self, vehicles, clients, cmap):
+#         self.vehicles = vehicles
+#         self.clients = clients
+#         self.cmap = cmap
+#
+#     def make_initial(self):
+#         s0 = [[] for x in self.vehicles]
+#         for vehicle in self.vehicles:
+#             cap = 0
+#             while cap < vehicle.capacity:
+#                 c_i = random.randint(0, len(self.clients) - 1)
+#
+#
+#         for client in self.clients:
+#             cap = 0
+#             while cap <
+#             v_i = random.randint(0, len(self.vehicles) - 1)
+#             s0[v_i].append(client.place_index - 1)
+#         return s0
+
+
+
 class STabuSearch(Algorithm):
-    TS_iter = 50
+    TS_iter = 100
     CAP_OVERLOAD_PENALTY = 5
     use_capacity = True
 
@@ -79,8 +104,10 @@ class STabuSearch(Algorithm):
         self.points = []
         self.max_tabu_size = 100
         self.tabu_list = set()
-        self.p = 5  # TODO limit neighbourhood to p-closest
+        self.p = 20  # TODO limit neighbourhood to p-closest
         self.best_cost = 0
+        self.feasible = False
+        self.increasing_counter = 0
 
 
     def solve(self, task: Task) -> Solution:
@@ -102,16 +129,18 @@ class STabuSearch(Algorithm):
         #     vehicles_to_places_dict[vehicle.vehicle_id] = [self.depot]
 
         # initial solution
-        self.s0 = [[] for x in self.vehicles]
-        for client in self.clients:
-            v_i = random.randint(0, len(self.vehicles)-1)
-            self.s0[v_i].append(client.place_index-1)
+        self.s0 = self.make_initial()
 
         best = self.search()
-        for route, vehicle in zip(best, self.vehicles):
-            for r in route:
-                place: Place = self.clients[r]
-                vehicles_to_places_dict[vehicle.vehicle_id].append(place)
+
+        if not self.feasible:
+            best = [[] for x in self.vehicles]
+
+        if self.feasible:
+            for route, vehicle in zip(best, self.vehicles):
+                for r in route:
+                    place: Place = self.clients[r]
+                    vehicles_to_places_dict[vehicle.vehicle_id].append(place)
 
         # finishing in depot
         # for vehicle in self.vehicles:
@@ -123,43 +152,55 @@ class STabuSearch(Algorithm):
         print("Problem Solved by Tabu!")
         return solution
 
+    def make_initial(self):
+        s0 = [[] for x in self.vehicles]
+        for client in self.clients:
+            v_i = random.randint(0, len(self.vehicles) - 1)
+            s0[v_i].append(client.place_index - 1)
+        return s0
+
     def search(self):
         s_best = self.s0
         best_candidate = self.s0
         best_global = copy(best_candidate)
         self.best_cost = 0
         i = 0
-        best_fit = 0
+        best_fit = inf
         while not self.stopping_condition(i):
             s_neighborhood = self.neighbourhood_search(best_candidate)
             if len(s_neighborhood) == 0:
                 if self.best_cost == 0:
-                    self.best_cost = -self.fitness(s_best)
+                    self.best_cost = self.fitness(s_best)
                 break
             best_moves = s_neighborhood[0]
             best_candidate = best_moves.make_move(best_candidate)
             for s_candidate_moves in s_neighborhood:
                 if not s_candidate_moves.check_tabu_list(self.tabu_list):
                     s_b = s_candidate_moves.make_move(best_global)
-                    if self.fitness(s_b) > self.fitness(best_candidate):
+                    if self.fitness(s_b) < self.fitness(best_candidate):
                         best_candidate = s_b
                         best_moves = s_candidate_moves
 
-            if self.fitness(best_candidate) > self.fitness(s_best):
+            fit = self.fitness(best_candidate)
+            if fit < best_fit:
                 s_best = best_candidate
+                best_fit = fit
+                self.increasing_counter += 1
+            else:
+                self.increasing_counter = 0
             best_global = copy(best_candidate)
             best_moves.update_tabu_list(self.tabu_list)
             if len(self.tabu_list) > self.max_tabu_size:
                 self.tabu_list.pop()
             i += 1
-            best_fit = self.fitness(s_best)
-            if i % 10 == 0:
-                print(f"TS {i}/{self.TS_iter} current best: {-best_fit}")
-        self.best_cost = -best_fit
+            # best_fit = self.fitness(s_best)
+            # if i % 10 == 0:
+            #     print(f"TS {i}/{self.TS_iter} current best: {-best_fit}")
+        self.best_cost = best_fit
         return s_best
 
     def stopping_condition(self, i):
-        return i > self.TS_iter
+        return i > self.TS_iter and self.increasing_counter < 5
 
     def neighbourhood_search(self, routes: list) -> list[Move]:
         all_solutions = []
@@ -191,14 +232,18 @@ class STabuSearch(Algorithm):
             if len(route) == 0:
                 continue
             u = route[0]
-            weight += self.distances[self.depot.place_index][self.clients[u].place_index]
+            weight += self.get_distance(self.depot, self.clients[u])
             for node in route[1:]:
-                weight += self.distances[self.clients[u].place_index][self.clients[node].place_index]
+                weight += self.get_distance(self.clients[u], self.clients[node]) #self.distances[self.clients[u].place_index][self.clients[node].place_index]
                 u = node
             # weight += = self.distances[self.clients[u].place_index][self.depot.place_index]
             #   ^^^ better vehicle spread if commented
             cap_overload += self.calc_capacity(route, self.vehicles[vehicle_ind].capacity)
-        return - (weight + weight * cap_overload * self.CAP_OVERLOAD_PENALTY)
+        if cap_overload > 0:
+            self.feasible = False
+        else:
+            self.feasible = True
+        return weight + weight * cap_overload * self.CAP_OVERLOAD_PENALTY
 
     def calc_capacity(self, route, capacity):
         if not self.use_capacity:
@@ -210,10 +255,24 @@ class STabuSearch(Algorithm):
             return current_capacity - capacity
         return 0
 
-    # def check_capacity_valid(self, route, capacity):
-    #     return self.calc_capacity(route, capacity) <= 0
+    def check_capacity_valid(self, route, capacity):
+        return self.calc_capacity(route, capacity) <= 0
 
+    def map_closest(self):
+        C = len(self.clients)
+        cmap = []
+        for i in range(C):
+            cmap.append([])
+            for j in range(C):
+                if i == j:
+                    continue
+                cmap[i].append((self.get_distance(self.clients[i], self.clients[j]), self.clients[j].place_index))
+            cmap[i].sort(key=itemgetter(0))
+        self.cmap = cmap
 
     def get_demand(self, v):
         return self.clients[v].demand
+
+    def get_distance(self, place_u, place_v):
+        return self.distances[place_u.place_index][place_v.place_index]
 
