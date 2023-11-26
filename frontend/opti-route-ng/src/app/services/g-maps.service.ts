@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { MapDirectionsService, MapGeocoder, MapGeocoderResponse } from '@angular/google-maps';
-import { Observable, catchError, forkJoin, map, of } from 'rxjs';
+import { Observable, catchError, forkJoin, map, of, tap } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { PlaceMarker } from '../models/PlaceMarker';
 import * as FileSaver from 'file-saver';
@@ -12,21 +12,43 @@ import * as FileSaver from 'file-saver';
 export class GMapsService {
   apiLoaded: Observable<boolean>;
   private distanceMatrixService!: google.maps.DistanceMatrixService;
-
+  public placesService!: google.maps.places.PlacesService;
   
   constructor(private httpClient: HttpClient, private  mapDirectionsService: MapDirectionsService, private geocoder: MapGeocoder) {
+    
     this.apiLoaded = this.httpClient.jsonp('https://maps.googleapis.com/maps/api/js?key=' + environment.gMapsApiKey + '&language=en', 'callback').pipe(
       map(() => {this.onApiLoaded(); return true}),
       catchError((error) => {
         console.error(error);
         return of(false);
       }),
+      
     );
   }
 
+
   private onApiLoaded(){
     this.distanceMatrixService = new google.maps.DistanceMatrixService();
+    // this.placesService = new google.maps.places.PlacesService(google.maps.Map);
     
+  }
+
+  getNerbyPlaces(location: google.maps.LatLng, radius: number): Observable<google.maps.places.PlaceResult[]>{
+    let r: google.maps.places.PlaceSearchRequest;
+    return new Observable<google.maps.places.PlaceResult[]>(observable => {
+      this.placesService.nearbySearch({
+        location: location,
+        radius: radius,
+        type: "restaurant"
+      }, (result) => {
+        if(!result){
+          return observable.error('No places');
+        }
+        observable.next(result);
+        observable.complete();
+      })
+    })
+   
   }
 
   getGeoInfo(latLng: google.maps.LatLng){

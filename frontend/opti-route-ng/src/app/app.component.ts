@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { environment } from '../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, forkJoin, map, of, tap } from 'rxjs';
@@ -11,17 +11,31 @@ import { v4 as uuidv4 } from 'uuid';
 import { Solution } from './models/Solution';
 import { FileService } from './services/file.service';
 import { MapRoute } from './models/MapRoute';
-
+import { GoogleMap } from '@angular/google-maps';
 
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements OnInit {
+
+  @ViewChild('myMap')
+  map!: GoogleMap;
+
   PlaceType: typeof PlaceType = PlaceType;
   selectedType: PlaceType = PlaceType.DEPOT;
+
+  generatorMode: boolean = false;
+  generatorLoading: boolean = false;
+  generator = {
+    min: 0,
+    max: 0,
+    radius: 1000,
+    places: 50
+  }
+
 
   algorithms: string[] = [];
 
@@ -44,9 +58,38 @@ export class AppComponent implements OnInit {
   vehicles: Vehicle[] = [];
 
 
+  apiLoaded: boolean = false;
   constructor(private geocoder: MapGeocoder, private taskService: TaskService, protected gMapsService: GMapsService, private fileService: FileService){
+   
+    this.gMapsService.apiLoaded.subscribe((loaded) => {
+      this.apiLoaded = loaded;
+      console.log('loaded');
+      setTimeout(() => {
+        
+        google.maps.importLibrary("places").then(() => {
+          if(this.map.googleMap){
+            this.gMapsService.placesService = new google.maps.places.PlacesService(this.map.googleMap);
+
+          }
+
+        });
+          
+
+        
+
+      }, 1000)
+      
+    }
+    )
     
   }
+
+  ngOnInit(): void {
+    
+    
+    this.taskService.getAlgorithms().subscribe((algorithms) => this.algorithms = algorithms);
+  }
+  
 
   routes: MapRoute[]=[];
   loadRoute(placesId:string[], color: string){
@@ -102,18 +145,40 @@ export class AppComponent implements OnInit {
     };
   }
 
-  ngOnInit(): void {
-    this.taskService.getAlgorithms().subscribe((algorithms) => this.algorithms = algorithms);
+  getTotalDemand(){
+    return this.placeMarkers.reduce((a, v) => a + v.demand, 0);
   }
-
   
 
   getGeoInfo(marker: PlaceMarker){
     this.gMapsService.getGeoInfo(marker.latLng).subscribe((r) => console.log(r))
   }
 
-  onMarkerAdd(event: google.maps.MapMouseEvent) {
+  onMapClick(event: google.maps.MapMouseEvent) {
     if(!event.latLng){
+      return;
+    }
+
+    if(this.generatorMode){
+      this.generatorLoading = true;
+      this.gMapsService.getNerbyPlaces(event.latLng, this.generator.radius).subscribe(places => {
+        places = places.splice(0, this.generator.places);
+        places.forEach(p => {
+          if(!p.geometry?.location){
+            return;
+          }
+
+          let pM = new PlaceMarker(p.geometry?.location, PlaceType.CLIENT);
+          let d= Math.floor(Math.random() * (this.generator.max - this.generator.min) + this.generator.min);
+          console.log(d)
+          pM.demand =d;
+          pM.placeId = p.place_id ?? '';
+          pM.description = p.formatted_address ?? '';
+          this.placeMarkers.push(pM);
+        })
+        this.generatorLoading = false;
+      })
+
       return;
     }
     
@@ -138,6 +203,7 @@ export class AppComponent implements OnInit {
 
     if(type == PlaceType.DEPOT){
       this.placeMarkers.unshift(m);
+      
     } else {
       this.placeMarkers.push(m);
     }
@@ -166,7 +232,7 @@ export class AppComponent implements OnInit {
   }
 
   addVehicle(){
-    this.vehicles.push(new Vehicle(0));
+    this.vehicles.push(new Vehicle(this.vehicles[this.vehicles.length-1]?.capacity ?? 0));
   }
   removeVehicle(id: string){
     let i = this.vehicles.findIndex(v => v.uuid == id);
