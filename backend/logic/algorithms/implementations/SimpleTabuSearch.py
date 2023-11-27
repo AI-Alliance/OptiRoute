@@ -1,12 +1,10 @@
 from math import inf
-from operator import itemgetter
-
 from logic import Task
 from logic.models.Place import Place
 from logic.Solution import Solution
 from logic.algorithms.Algorithm import Algorithm
 
-from logic.algorithms.utils import IterPairs, copy
+from logic.algorithms.utils import IterPairs, copy, DistanceMapper
 import random
 
 class Move:
@@ -42,9 +40,6 @@ class InsertMove(Move):
     def check_tabu_list(self, tabu_list):
         return (self.to_route, self.value) in tabu_list
 
-    def calculate_cost(self, solution, cost):
-        pass
-
 
 class SwapMove(Move):
     def __init__(self, route1, route2, value1, value2, position1, position2):
@@ -70,6 +65,7 @@ class SwapMove(Move):
                 and (self.route1, self.value2) in tabu_list)
 
 
+# Nearest Neighbor Algorithm
 class CMapBuildAlgorithm:
     def __init__(self, vehicles, clients, cmap):
         self.vehicles = vehicles.copy()
@@ -133,8 +129,10 @@ class STabuSearch(Algorithm):
         self.start_in_depo(self.depot, self.vehicles, vehicles_to_places_dict)
 
         # initial solution
+        self.dm = DistanceMapper(self.clients, self.distances)
         self.s0 = self.make_initial()
 
+        # calculate solution
         best = self.search()
 
         if not self.feasible:
@@ -155,7 +153,7 @@ class STabuSearch(Algorithm):
         return solution
 
     def make_initial(self):
-        self.map_closest()
+        self.cmap, self.smap =  self.dm.map_closest()
         builder = CMapBuildAlgorithm(self.vehicles, self.clients, self.cmap)
         return builder.make_initial()
 
@@ -238,8 +236,8 @@ class STabuSearch(Algorithm):
             for node in route[1:]:
                 weight += self.get_distance(self.clients[u], self.clients[node])
                 u = node
-            # weight += = self.distances[self.clients[u].place_index][self.depot.place_index]
-            #   ^^^ better vehicle spread if not included
+            weight += self.get_distance(self.clients[u], self.depot)
+              # ^^^ better vehicle spread if not included, but it would be OVRP
             cap_overload += self.calc_capacity(route, self.vehicles[vehicle_ind].capacity)
         if cap_overload > 0:
             self.feasible = False
@@ -259,22 +257,6 @@ class STabuSearch(Algorithm):
 
     def check_capacity_valid(self, route, capacity):
         return self.calc_capacity(route, capacity) <= 0
-
-    def map_closest(self):
-        cmap = {}
-        smap = {}
-        for ci in self.clients:
-            p = []
-            for cj in self.clients:
-                if ci.place_index == cj.place_index:
-                    continue
-                p.append((self.get_distance(ci, cj), cj))
-            p.sort(key=itemgetter(0))
-            for i, (d, cj) in enumerate(p):
-                smap.update({(ci.place_index,cj.place_index): i})
-            cmap.update({ci.place_index: p})
-        self.cmap = cmap
-        self.smap = smap
 
     def get_demand(self, v):
         return self.clients[v].demand
