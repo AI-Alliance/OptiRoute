@@ -52,15 +52,24 @@ export class GMapsService {
   }
 
   getGeoInfo(latLng: google.maps.LatLng){
+    
     return this.geocoder.geocode({
       location: latLng
     })
   }
 
+  private geoCache: Map<string, MapGeocoderResponse> = new Map();
   getGeoInfoById(placeId: string){
+    const cacheKey = placeId;
+
+    let cachedData = this.geoCache.get(cacheKey);
+    if(cachedData){
+      return of(cachedData);
+    }
+
     return this.geocoder.geocode({
       placeId: placeId
-    })
+    }).pipe(tap(geoData => this.geoCache.set(cacheKey, geoData)))
   }
 
   
@@ -86,9 +95,18 @@ export class GMapsService {
     return this.mapDirectionsService.route(request).pipe(map(response => response.result));
   }
 
+  private matrixCache: Map<string, number[][]> = new Map();
   getMatrix(placeMarkers: PlaceMarker[]): Observable<number[][]>{    
-    return this.getCompositionMatrix(placeMarkers);
+    const cacheKey = placeMarkers.map(marker => `${marker.placeId}`).join(',');
+
+    let cachedMatrix = this.matrixCache.get(cacheKey);
+    if(cachedMatrix){
+      return of(cachedMatrix);
+    }
+
+    return this.getCompositionMatrix(placeMarkers).pipe(tap( matrix => this.matrixCache.set(cacheKey, matrix)));
   }
+
 
   private getCompositionMatrix(placeMarkers: PlaceMarker[]){
     let observables: Observable<number[][]>[] = [];
