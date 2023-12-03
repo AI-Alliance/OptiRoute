@@ -190,7 +190,7 @@ class STabuSearch(Algorithm):
 
     def stopping_condition(self, i):
         return i > self.TS_iter and self.increasing_counter < 1
-c
+
     def neighbourhood_search(self, routes: list) -> list[Move]:
         all_solutions = []
         for route1, route2 in IterPairs(len(routes)):
