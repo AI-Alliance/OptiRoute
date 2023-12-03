@@ -63,23 +63,24 @@ class DistanceMapper:
 
 class CMapBuildAlgorithm: # Nearest Neighbor build heuristic
     def __init__(self, vehicles, clients, cmap):
-        self.vehicles = vehicles.copy()
-        self.clients: list[Place] = clients.copy()
+        self.vehicles = vehicles
+        self.clients: list[Place] = clients
         self.cmap: dict = cmap
 
     def make_initial(self):
+        clients_copy = self.clients.copy()
         s0 = [[] for _ in self.vehicles]
         visited = []
         for v_i, vehicle in enumerate(self.vehicles):
-            if len(self.clients) == 0:
+            if len(clients_copy) == 0:
                 break
             cap = 0
-            c = random.choice(self.clients)
+            c = random.choice(clients_copy)
             s0[v_i].append(c.place_index - 1)
             visited.append(c)
             cap += c.demand
             closest = self.cmap[c.place_index]
-            self.clients.remove(c)
+            clients_copy.remove(c)
             for distance, node in closest:
                 if cap > vehicle.capacity:
                     break
@@ -87,5 +88,5 @@ class CMapBuildAlgorithm: # Nearest Neighbor build heuristic
                     s0[v_i].append(node.place_index - 1)
                     visited.append(node)
                     cap += node.demand
-                    self.clients.remove(node)
+                    clients_copy.remove(node)
         return s0
