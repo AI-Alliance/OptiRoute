@@ -1,6 +1,6 @@
 from logic.algorithms import AlgorithmType
 from logic.algorithms.Algorithm import Algorithm
-from logic.algorithms.implementations import STabuSearch, GreedyAlgorithm
+from logic.algorithms.implementations import STabuSearch, GreedyAlgorithm, AdaptiveMemoryTabuSearch
 from logic.algorithms.implementations.GoogleAlgorithm import GoogleAlgorithm
 
 
@@ -12,6 +12,8 @@ class AlgorithmFactory:
                 return GreedyAlgorithm()
             case AlgorithmType.TABU:
                 return STabuSearch()
+            case AlgorithmType.AM_TABU:
+                return AdaptiveMemoryTabuSearch()
             case AlgorithmType.GOOGLE:
                 return GoogleAlgorithm()
             case _:
