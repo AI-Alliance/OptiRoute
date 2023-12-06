@@ -110,7 +110,6 @@ export class AppComponent implements OnInit {
           return;
         }
         this.routes.push(new MapRoute(r,{markerOptions:{visible: false}, polylineOptions: {strokeColor: color, strokeOpacity: 0.5, strokeWeight: 5}}));
-        this.updateSolutionsStats();
       })
       
     })
@@ -133,15 +132,6 @@ export class AppComponent implements OnInit {
       this.loadRoute(vehicle.route.places.map((p)=> p.place_id), colors.pop() ?? 'black');
     }
 
-  }
-
-  solutionsStats: {max: number, avg: number} = {max: 0, avg: 0};
-  updateSolutionsStats(){
-    let durations = this.routes.map((r)=> r.totalDurationSeconds);
-    this.solutionsStats= {
-      max: Math.max(...durations),
-      avg: durations.reduce((a, b) => a + b, 0) / durations.length
-    };
   }
 
   getTotalDemand(){
@@ -245,11 +235,13 @@ export class AppComponent implements OnInit {
     return this.vehicles.length && (this.placeMarkers.length > 1) && this.hasDepotMarker() && this.selectedAlgorithm.length;
   }
 
+  lastSolution?: Solution;
   getSolution(){
     this.taskLoading = true;
 
     this.taskService.getSolution(this.placeMarkers, this.vehicles, this.selectedAlgorithm).subscribe(solution => {
       this.showSolution(solution);
+      this.lastSolution = solution;
       this.taskLoading = false;
     })    
   }

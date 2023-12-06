@@ -9,5 +9,6 @@ export interface Solution{
         }
         
         vehicle_id: string
-    }[]
+    }[],
+    stats: {max: number, avg: number, sum: number}
 }

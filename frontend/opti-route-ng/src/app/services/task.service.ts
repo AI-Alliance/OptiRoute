@@ -4,7 +4,7 @@ import { environment } from 'src/environments/environment';
 import { Vehicle } from '../models/Vehicle';
 import { PlaceMarker } from '../models/PlaceMarker';
 import { v4 as uuidv4 } from 'uuid';
-import { Observable, map, switchMap } from 'rxjs';
+import { Observable, map, switchMap, tap } from 'rxjs';
 import { Solution } from '../models/Solution';
 import { GMapsService } from './g-maps.service';
 
@@ -30,6 +30,13 @@ export class TaskService {
             return this.pollSolution(taskId);
           })
         )
+      }),
+      tap((solution: Solution) =>  {
+        solution.stats = {
+          max: solution.vehicles.reduce((max, vehicle) => vehicle.route.duration_sum > max ? vehicle.route.duration_sum : max, 0),
+          avg: solution.vehicles.reduce((sum, vehicle) => sum + vehicle.route.duration_sum, 0) / solution.vehicles.length,
+          sum: solution.vehicles.reduce((sum, vehicle) => sum + vehicle.route.duration_sum, 0)
+        }
       })
     )
   }
