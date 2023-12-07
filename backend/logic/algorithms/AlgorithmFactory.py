@@ -14,9 +14,9 @@ class AlgorithmFactory:
                 return STabuSearch()
             case AlgorithmType.AM_TABU:
                 return AdaptiveMemoryTabuSearch()
-            case AlgorithmType.GOOGLE_GUIDED_LOCAL_SEARCH:
+            case AlgorithmType.GOOGLE_GLS:
                 return GoogleAlgorithm(GoogleAlgoType.GUIDED_LOCAL_SEARCH)
-            case AlgorithmType.GOOGLE_SIMULATED_ANNEALING:
+            case AlgorithmType.GOOGLE_SA:
                 return GoogleAlgorithm(GoogleAlgoType.SIMULATED_ANNEALING)
             case _:
                 raise ValueError("Invalid Type")
