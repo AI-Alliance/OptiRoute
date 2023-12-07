@@ -37,7 +37,7 @@ def insert_sorted_labeled_routes(a: list[RouteWithLabel], x: RouteWithLabel):
         elif a[i].feasibility == x.feasibility and a[i].cost < x.cost:
             break
         i += 1
-    a.insert(i, x)
+    return i
 
 
 class AdaptiveMemoryTabuSearch(Algorithm):
@@ -106,7 +106,9 @@ class AdaptiveMemoryTabuSearch(Algorithm):
         f = self.check_feasibility(s)
         c = -self.check_cost(s)
         for i, r in enumerate(s):
-            insert_sorted_labeled_routes(self.VehMemory[i], RouteWithLabel(f, c, r))
+            labeled_route = RouteWithLabel(f, c, r)
+            loc = insert_sorted_labeled_routes(self.VehMemory[i], labeled_route)
+            self.VehMemory[i].insert(loc, labeled_route)
 
     def check_cost(self, solution):
         if len(solution) == 0:

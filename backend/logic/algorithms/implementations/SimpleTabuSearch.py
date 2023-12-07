@@ -177,9 +177,9 @@ class STabuSearch(Algorithm):
                 s_best = best_candidate_sol
                 s_best_fit = best_candidate_fit
                 self.feasible = self.check_feasibility(s_best)
-                self.increasing_counter += 1
-            else:
-                self.increasing_counter = 0
+                self.increasing_counter = 10
+            elif self.increasing_counter > 0:
+                self.increasing_counter -= 1
             ref = best_candidate_sol
 
             if self.USE_LIMITING_TABU and len(self.tabu_list) > self.MAX_TABU_SIZE:
@@ -189,7 +189,9 @@ class STabuSearch(Algorithm):
         return s_best
 
     def stopping_condition(self, i):
-        return i > self.TS_iter and self.increasing_counter < 1
+        if i > self.TS_iter and self.increasing_counter > 0:
+            self.TS_iter += 10
+        return i > self.TS_iter
 
     def neighbourhood_search(self, routes: list) -> list[Move]:
         all_solutions = []

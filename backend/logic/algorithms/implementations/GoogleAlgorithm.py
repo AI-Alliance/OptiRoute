@@ -7,9 +7,17 @@ from logic.SolutionStatus import SolutionStatus
 from logic.algorithms.Algorithm import Algorithm
 from logic.models import Place
 from logic.models.Vehicle import Vehicle
+from enum import Enum
 
+class GoogleAlgoType(Enum):
+    GUIDED_LOCAL_SEARCH = 0
+    SIMULATED_ANNEALING = 1
 
 class GoogleAlgorithm(Algorithm):
+    def __init__(self, algorithm=GoogleAlgoType.GUIDED_LOCAL_SEARCH):
+        super().__init__()
+        self.algorithm_type = algorithm
+
     def solve(self, task: Task) -> Solution:
         """Entry point of the program."""
         # Instantiate the data problem.
@@ -91,11 +99,19 @@ class GoogleAlgorithm(Algorithm):
     def setting_first_solution_heuristic(self):
         search_parameters = pywrapcp.DefaultRoutingSearchParameters()
         search_parameters.first_solution_strategy = (
-            routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC
+            routing_enums_pb2.FirstSolutionStrategy.SAVINGS
         )
-        search_parameters.local_search_metaheuristic = (
-            routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH
-        )
+
+        if self.algorithm_type == GoogleAlgoType.SIMULATED_ANNEALING:
+            search_parameters.local_search_metaheuristic = (
+                routing_enums_pb2.LocalSearchMetaheuristic.SIMULATED_ANNEALING
+            )
+        else:
+            search_parameters.local_search_metaheuristic = (
+                routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH
+            )
+
+
         search_parameters.time_limit.FromSeconds(1)
         return search_parameters
 
