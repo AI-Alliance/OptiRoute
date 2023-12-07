@@ -1,2 +1,3 @@
 from .GreedyAlgorithm import GreedyAlgorithm
 from .SimpleTabuSearch import STabuSearch
+from .AdaptiveMemoryTabu import AdaptiveMemoryTabuSearch
