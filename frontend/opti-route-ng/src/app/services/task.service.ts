@@ -22,6 +22,8 @@ export class TaskService {
   }
 
   getSolution(placeMarkers: PlaceMarker[], vehicles: Vehicle[], algorithm: string): Observable<Solution>{
+    let vehiclesC: number[] = vehicles.map(v => v.capacity);
+    let placesD: number[] = placeMarkers.slice(1).map(p => p.demand);
     return this.gMapsService.getMatrix(placeMarkers).pipe(
       switchMap((matrix) => {
         let taskId = uuidv4();
@@ -32,6 +34,9 @@ export class TaskService {
         )
       }),
       tap((solution: Solution) =>  {
+        solution.vehiclesC = vehiclesC;
+        solution.placesD = placesD;
+        solution.algorithm = algorithm;
         solution.stats = {
           max: solution.vehicles.reduce((max, vehicle) => vehicle.route.duration_sum > max ? vehicle.route.duration_sum : max, 0),
           avg: solution.vehicles.reduce((sum, vehicle) => sum + vehicle.route.duration_sum, 0) / solution.vehicles.length,

@@ -259,5 +259,11 @@ export class AppComponent implements OnInit {
   downloadInput(){
     this.fileService.downloadInput(this.placeMarkers, this.vehicles);
   }
+  downloadResult(){
+    if(!this.lastSolution){
+      return;
+    }
+    this.fileService.downloadResult(this.lastSolution);
+  }
 }
 
