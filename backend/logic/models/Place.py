@@ -6,7 +6,7 @@ class Place(Model):
         self._place_id: str = place_id
         self._demand: int = demand
         self._place_index: int= place_index
-        print(f"Place {self._place_id} with demand {self._demand} was created!")
+        # print(f"Place {self._place_id} with demand {self._demand} was created!")
     @property
     def place_id(self):
         return self._place_id

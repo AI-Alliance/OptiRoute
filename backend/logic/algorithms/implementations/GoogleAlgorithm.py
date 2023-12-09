@@ -14,6 +14,8 @@ class GoogleAlgoType(Enum):
     GUIDED_LOCAL_SEARCH = 1
     SIMULATED_ANNEALING = 2
     CW_ONLY = 3
+    GOOGLE_TABU = 4
+
 
 class GoogleAlgorithm(Algorithm):
     def __init__(self, algorithm=GoogleAlgoType.NOT_INITIALIZED):
@@ -97,7 +99,7 @@ class GoogleAlgorithm(Algorithm):
     def get_vehicles_id_to_places_dict(self,vehicle_index_to_places_index:dict, vehicles:list[Vehicle], places:list[Place]):
         vehicles_id_to_places_dict = {}
         for vehicle_index, places_indexes in vehicle_index_to_places_index.items():
-            print(places_indexes)
+            #print(places_indexes)
             vehicles_id_to_places_dict[vehicles[vehicle_index].vehicle_id] = [places[place_index] for place_index in places_indexes]
         return vehicles_id_to_places_dict
     def setting_first_solution_heuristic(self):
@@ -113,6 +115,8 @@ class GoogleAlgorithm(Algorithm):
         elif self.algorithm_type == GoogleAlgoType.CW_ONLY:
             search_parameters.first_solution_strategy = routing_enums_pb2.FirstSolutionStrategy.SAVINGS
             # no local_search_metaheuristic
+        elif self.algorithm_type == GoogleAlgoType.GOOGLE_TABU:
+            search_parameters.local_search_metaheuristic = (routing_enums_pb2.LocalSearchMetaheuristic.TABU_SEARCH)
         else:
             raise Exception
 
@@ -142,7 +146,7 @@ class GoogleAlgorithm(Algorithm):
         data["distance_matrix"] = (distance_matrix.astype(int)).tolist()
 
         # distance_matrix.tolist()
-        print(distance_matrix.tolist())
+        #print(distance_matrix.tolist())
         data["num_vehicles"] = num_vehicles
         data["depot"] = 0
         data["demands"] = demands

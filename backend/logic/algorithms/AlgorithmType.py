@@ -7,4 +7,4 @@ class AlgorithmType(Enum):
     GOOGLE_GLS = 4
     GOOGLE_SA = 5
     GOOGLE_CW = 6
-    GOOGLE_TABU = 6
+    GOOGLE_TABU = 7
