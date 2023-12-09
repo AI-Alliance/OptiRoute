@@ -3,7 +3,8 @@ docker build -t g-backend .
 docker run -p 5000:5000 g-backend
 
 # FLASK SERVER
-
+## activate venv
+venv\Scripts\activate
 ## Run the server
 flask run
 

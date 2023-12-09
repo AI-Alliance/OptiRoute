@@ -79,7 +79,8 @@ def is_in_tabu(move: Move, tabu_list, solution):
 class STabuSearch(Algorithm):
     USE_LIMITING_TABU = False
     MAX_TABU_SIZE = 0 #^
-    TS_iter = 100
+    TS_iter = 50
+    ITER_ADDITION = 10
     CAP_OVERLOAD_PENALTY = 5
     use_capacity = True
     USE_LIMITING_NEIGHBOURHOOD = True
@@ -161,48 +162,52 @@ class STabuSearch(Algorithm):
         while not self.stopping_condition(i): # iterations
             s_neighborhood = self.neighbourhood_search(ref)
             if len(s_neighborhood) == 0:
-                break
+                self.feasible = self.check_feasibility(s_best)
+                return s_best
             best_candidate_moves = s_neighborhood[0] # best from neighbourhood
             best_candidate_sol = best_candidate_moves.make_move(ref)
             best_candidate_fit = self.fitness(best_candidate_sol)
             for candidate_moves in s_neighborhood: # find best from neighbourhood
                 if not is_in_tabu(candidate_moves, self.tabu_list, candidate_moves.make_move(ref)):
                     candidate_sol = candidate_moves.make_move(ref)
-                    if self.fitness(candidate_sol) < best_candidate_fit:
+                    fit = self.fitness(candidate_sol)
+                    if fit < best_candidate_fit:
                         best_candidate_sol = candidate_sol
                         best_candidate_moves = candidate_moves
-                        best_candidate_fit = self.fitness(best_candidate_sol)
+                        best_candidate_fit = fit
             self.tabu_list = update_tabu(best_candidate_moves, self.tabu_list, best_candidate_sol) # update tabu list with best from neighbourhood
             if best_candidate_fit < s_best_fit: # new best (if it is better)
                 s_best = best_candidate_sol
                 s_best_fit = best_candidate_fit
                 self.feasible = self.check_feasibility(s_best)
-                self.increasing_counter = 10
+                self.increasing_counter = self.ITER_ADDITION
             elif self.increasing_counter > 0:
                 self.increasing_counter -= 1
             ref = best_candidate_sol
 
             if self.USE_LIMITING_TABU and len(self.tabu_list) > self.MAX_TABU_SIZE:
-                for i in range(self.MAX_TABU_SIZE // 10):
+                for i in range(self.MAX_TABU_SIZE // self.ITER_ADDITION):
                     self.tabu_list.pop()
             i += 1
         return s_best
 
     def stopping_condition(self, i):
         if i > self.TS_iter and self.increasing_counter > 0:
-            self.TS_iter += 10
+            self.TS_iter += self.ITER_ADDITION
         return i > self.TS_iter
 
     def neighbourhood_search(self, routes: list) -> list[Move]:
         all_solutions = []
+        if len(routes) < 2:
+            return []
         for route1, route2 in IterPairs(len(routes)):
             if route1 == route2:
                 continue
-            solutions = self.two_lists_exchanges(routes, route1, route2)
+            solutions = self.two_lists_moves(routes, route1, route2)
             all_solutions += solutions
         return all_solutions
 
-    def two_lists_exchanges(self, routes: list, r1: int, r2: int) -> list[Move]:
+    def two_lists_moves(self, routes: list, r1: int, r2: int) -> list[Move]:
         solutions = []
         for i1, v1 in enumerate(routes[r1]):
             for i2, v2 in enumerate(routes[r2]):

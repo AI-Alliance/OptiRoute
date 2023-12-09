@@ -10,11 +10,15 @@ from logic.models.Vehicle import Vehicle
 from enum import Enum
 
 class GoogleAlgoType(Enum):
-    GUIDED_LOCAL_SEARCH = 0
-    SIMULATED_ANNEALING = 1
+    NOT_INITIALIZED = 0
+    GUIDED_LOCAL_SEARCH = 1
+    SIMULATED_ANNEALING = 2
+    CW_ONLY = 3
+    GOOGLE_TABU = 4
+
 
 class GoogleAlgorithm(Algorithm):
-    def __init__(self, algorithm=GoogleAlgoType.GUIDED_LOCAL_SEARCH):
+    def __init__(self, algorithm=GoogleAlgoType.NOT_INITIALIZED):
         super().__init__()
         self.algorithm_type = algorithm
 
@@ -64,7 +68,9 @@ class GoogleAlgorithm(Algorithm):
 
 
         # Setting first solution heuristic.
+
         search_parameters = self.setting_first_solution_heuristic()
+        routing.CloseModelWithParameters(search_parameters)
 
         # Solve the problem.
         google_solution = routing.SolveWithParameters(search_parameters)
@@ -93,24 +99,26 @@ class GoogleAlgorithm(Algorithm):
     def get_vehicles_id_to_places_dict(self,vehicle_index_to_places_index:dict, vehicles:list[Vehicle], places:list[Place]):
         vehicles_id_to_places_dict = {}
         for vehicle_index, places_indexes in vehicle_index_to_places_index.items():
-            print(places_indexes)
+            #print(places_indexes)
             vehicles_id_to_places_dict[vehicles[vehicle_index].vehicle_id] = [places[place_index] for place_index in places_indexes]
         return vehicles_id_to_places_dict
     def setting_first_solution_heuristic(self):
         search_parameters = pywrapcp.DefaultRoutingSearchParameters()
         search_parameters.first_solution_strategy = (
-            routing_enums_pb2.FirstSolutionStrategy.SAVINGS
+            routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC
         )
 
         if self.algorithm_type == GoogleAlgoType.SIMULATED_ANNEALING:
-            search_parameters.local_search_metaheuristic = (
-                routing_enums_pb2.LocalSearchMetaheuristic.SIMULATED_ANNEALING
-            )
+            search_parameters.local_search_metaheuristic = (routing_enums_pb2.LocalSearchMetaheuristic.SIMULATED_ANNEALING)
+        elif self.algorithm_type == GoogleAlgoType.GUIDED_LOCAL_SEARCH:
+            search_parameters.local_search_metaheuristic = (routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH)
+        elif self.algorithm_type == GoogleAlgoType.CW_ONLY:
+            search_parameters.first_solution_strategy = routing_enums_pb2.FirstSolutionStrategy.SAVINGS
+            # no local_search_metaheuristic
+        elif self.algorithm_type == GoogleAlgoType.GOOGLE_TABU:
+            search_parameters.local_search_metaheuristic = (routing_enums_pb2.LocalSearchMetaheuristic.TABU_SEARCH)
         else:
-            search_parameters.local_search_metaheuristic = (
-                routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH
-            )
-
+            raise Exception
 
         search_parameters.time_limit.FromSeconds(1)
         return search_parameters
@@ -138,7 +146,7 @@ class GoogleAlgorithm(Algorithm):
         data["distance_matrix"] = (distance_matrix.astype(int)).tolist()
 
         # distance_matrix.tolist()
-        print(distance_matrix.tolist())
+        #print(distance_matrix.tolist())
         data["num_vehicles"] = num_vehicles
         data["depot"] = 0
         data["demands"] = demands

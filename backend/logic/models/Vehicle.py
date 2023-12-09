@@ -5,7 +5,7 @@ class Vehicle(Model):
     def __init__(self, vehicle_id: int, capacity: int):
         self._vehicle_id = vehicle_id
         self._capacity = capacity
-        print(f"Vehicle {self._vehicle_id}  with capacity {self._capacity}  was created!")
+        #print(f"Vehicle {self._vehicle_id}  with capacity {self._capacity}  was created!")
     @property
     def vehicle_id(self):
         return self._vehicle_id
