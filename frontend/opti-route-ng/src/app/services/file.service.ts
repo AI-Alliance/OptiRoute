@@ -5,6 +5,8 @@ import * as FileSaver from 'file-saver';
 import { Observable, forkJoin, map, switchMap } from 'rxjs';
 import { GMapsService } from './g-maps.service';
 import { MapGeocoderResponse } from '@angular/google-maps';
+import * as Papa from 'papaparse';
+import { Solution } from '../models/Solution';
 
 @Injectable({
   providedIn: 'root'
@@ -26,6 +28,29 @@ export class FileService {
     return this.readFile(file).pipe(
       switchMap((jsonData) => this.parseJsonObject(jsonData))
     )
+  }
+
+  downloadResult(solution:Solution){
+    let data = [{
+      algorithm: solution.algorithm,
+      cN: solution.placesD.length,
+      cSum: solution.placesD.reduce((a,v) => a + v),
+      cMin: solution.placesD.reduce((a,v) => Math.min(a, v)),
+      cMax: solution.placesD.reduce((a,v) => Math.max(a, v)),
+      vN: solution.vehiclesC.length,
+      vSum: solution.vehiclesC.reduce((a,v) => a + v),
+      vMin: solution.vehiclesC.reduce((a,v) => Math.min(a, v)),
+      vMax: solution.vehiclesC.reduce((a,v) => Math.max(a, v)),
+     
+      avg: solution.stats.avg,
+      max: solution.stats.max,
+      sum: solution.stats.sum
+    }];
+
+    const csv = Papa.unparse(data);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+ 
+    FileSaver.saveAs(blob,  "opti-result_"+new Date().toLocaleDateString()+".csv");
   }
 
 
@@ -77,6 +102,7 @@ export class FileService {
     }) )
   }
 }
+
 
 interface FilePlace{
   placeId: string, 

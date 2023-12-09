@@ -1,6 +1,6 @@
-<div class="row gx-0" style="height: 100vh;">
-  <div class="d-flex align-items-start flex-column col-2 m-3">
-  
+<div class="row gx-0">
+  <div class="d-flex align-items-start flex-column col-2 sidebar">
+    
     <h2>Marker type</h2>
     <div class="btn-group">
       <button type="button" [disabled]="hasDepotMarker()" class="btn btn-outline-primary" [class.active]="selectedType == PlaceType.DEPOT" (click)="selectedType = PlaceType.DEPOT">Depot</button>
@@ -12,7 +12,7 @@
       <span *ngIf="!placeMarkers.length" class="position-absolute top-0 start-100 translate-middle p-2  bg-danger border border-light rounded-circle">
       </span>
     </div>
-    <ul class="list-group w-100 overflow-y-scroll" style="height: 200px;">
+    <ul class="list-group w-100 overflow-y-scroll" style="min-height: 200px; height: 200px;">
       <li class="list-group-item" *ngFor="let pm of placeMarkers">
         <div class="form-group row" >
           <label >{{pm.type.toUpperCase()}}</label>
@@ -37,7 +37,7 @@
       
     </div>
     
-    <ul class="list-group w-100 overflow-y-scroll" style="height: 200px;">
+    <ul class="list-group w-100 overflow-y-scroll" style="min-height: 200px; height: 200px;">
       <li class="list-group-item" *ngFor="let vehicle of vehicles">
         <div class="form-group row" >
           
@@ -63,7 +63,7 @@
         Loading...
       </ng-container>
     </button>
-    <div *ngIf="generatorMode" class="w-100">
+    <div *ngIf="generatorMode">
       <div  class="form-group row mb-1">
         <label class="col col-form-label">Min:</label>
         <div class="col">
@@ -97,8 +97,9 @@
       </select>
     </div>
     <div>
-      avg: {{solutionsStats.avg}}
-      max: {{solutionsStats.max}}
+      avg: {{lastSolution?.stats?.avg?.toFixed(3)}}
+      max: {{lastSolution?.stats?.max}}
+      sum: {{lastSolution?.stats?.sum}}
     </div>
     
     
@@ -117,7 +118,9 @@
       <button class="btn btn-primary" [disabled]="!taskDataIsReady()" (click)="downloadInput()">
         Export data
       </button>
-      
+      <button class="btn btn-primary" [disabled]="!lastSolution" (click)="downloadResult()">
+        Export result
+      </button>
     </div>
     <div class="mt-3">
       <label class="form-label">Import data</label>
