@@ -161,17 +161,18 @@ class STabuSearch(Algorithm):
         while not self.stopping_condition(i): # iterations
             s_neighborhood = self.neighbourhood_search(ref)
             if len(s_neighborhood) == 0:
-                break
+                return s_best
             best_candidate_moves = s_neighborhood[0] # best from neighbourhood
             best_candidate_sol = best_candidate_moves.make_move(ref)
             best_candidate_fit = self.fitness(best_candidate_sol)
             for candidate_moves in s_neighborhood: # find best from neighbourhood
                 if not is_in_tabu(candidate_moves, self.tabu_list, candidate_moves.make_move(ref)):
                     candidate_sol = candidate_moves.make_move(ref)
-                    if self.fitness(candidate_sol) < best_candidate_fit:
+                    fit = self.fitness(candidate_sol)
+                    if fit < best_candidate_fit:
                         best_candidate_sol = candidate_sol
                         best_candidate_moves = candidate_moves
-                        best_candidate_fit = self.fitness(best_candidate_sol)
+                        best_candidate_fit = fit
             self.tabu_list = update_tabu(best_candidate_moves, self.tabu_list, best_candidate_sol) # update tabu list with best from neighbourhood
             if best_candidate_fit < s_best_fit: # new best (if it is better)
                 s_best = best_candidate_sol
@@ -198,11 +199,24 @@ class STabuSearch(Algorithm):
         for route1, route2 in IterPairs(len(routes)):
             if route1 == route2:
                 continue
-            solutions = self.two_lists_exchanges(routes, route1, route2)
+            solutions = self.two_lists_moves(routes, route1, route2)
+            all_solutions += solutions
+        for ri, route in enumerate(routes):
+            solutions = self.one_list_moves(route, ri)
             all_solutions += solutions
         return all_solutions
 
-    def two_lists_exchanges(self, routes: list, r1: int, r2: int) -> list[Move]:
+    def one_list_moves(self, route: list, ri: int):
+        moves = []
+        for i1, v1 in enumerate(route):
+            for i2, v2 in enumerate(route):
+                if i1 == i2:
+                    continue
+                sol = SwapMove(ri, ri, v1, v2, i1, i2)
+                moves.append(sol)
+        return moves
+
+    def two_lists_moves(self, routes: list, r1: int, r2: int) -> list[Move]:
         solutions = []
         for i1, v1 in enumerate(routes[r1]):
             for i2, v2 in enumerate(routes[r2]):
