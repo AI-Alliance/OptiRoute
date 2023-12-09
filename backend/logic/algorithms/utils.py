@@ -82,7 +82,7 @@ class CMapBuildAlgorithm: # Nearest Neighbor build heuristic
             closest = self.cmap[c.place_index]
             clients_copy.remove(c)
             for distance, node in closest:
-                if cap > vehicle.capacity:
+                if cap >= vehicle.capacity:
                     break
                 if node not in visited:
                     s0[v_i].append(node.place_index - 1)
