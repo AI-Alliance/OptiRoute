@@ -39,8 +39,8 @@ export class GMapsService {
       this.placesService.nearbySearch({
         location: location,
         radius: radius,
-        type: "restaurant"
-      }, (result) => {
+        type: "cafe"
+      }, (result: google.maps.places.PlaceResult[] | null) => {
         if(!result){
           return observable.error('No places');
         }
@@ -50,6 +50,10 @@ export class GMapsService {
     })
    
   }
+
+  // getNerbyPlacesPage(location: google.maps.LatLng, nextPageToken){
+
+  // }
 
   getGeoInfo(latLng: google.maps.LatLng){
     

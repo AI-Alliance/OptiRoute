@@ -85,7 +85,7 @@
       <div  class="form-group row mb-1">
         <label class="col col-form-label">Places:</label>
         <div class="col">
-          <input class="form-control" min="0" max="100" type="number" (change)="generator.places = +$any($event.target).value" [value]="generator.places">
+          <input class="form-control" min="0" max="20" type="number" (change)="generator.places = +$any($event.target).value" [value]="generator.places">
         </div>
       </div>
     </div>
@@ -97,7 +97,6 @@
       </select>
     </div>
     <div>
-      avg: {{lastSolution?.stats?.avg?.toFixed(3)}}
       max: {{lastSolution?.stats?.max}}
       sum: {{lastSolution?.stats?.sum}}
     </div>
@@ -118,8 +117,8 @@
       <button class="btn btn-primary" [disabled]="!taskDataIsReady()" (click)="downloadInput()">
         Export data
       </button>
-      <button class="btn btn-primary" [disabled]="!lastSolution" (click)="downloadResult()">
-        Export result
+      <button class="btn btn-primary" [disabled]="!taskDataIsReady()" (click)="startTests()">
+        Start tests
       </button>
     </div>
     <div class="mt-3">

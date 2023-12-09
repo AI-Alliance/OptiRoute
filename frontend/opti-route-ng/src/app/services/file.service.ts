@@ -30,24 +30,24 @@ export class FileService {
     )
   }
 
-  downloadResult(solution:Solution){
-    let data = [{
-      algorithm: solution.algorithm,
-      cN: solution.placesD.length,
-      cSum: solution.placesD.reduce((a,v) => a + v),
-      cMin: solution.placesD.reduce((a,v) => Math.min(a, v)),
-      cMax: solution.placesD.reduce((a,v) => Math.max(a, v)),
-      vN: solution.vehiclesC.length,
-      vSum: solution.vehiclesC.reduce((a,v) => a + v),
-      vMin: solution.vehiclesC.reduce((a,v) => Math.min(a, v)),
-      vMax: solution.vehiclesC.reduce((a,v) => Math.max(a, v)),
-     
-      avg: solution.stats.avg,
-      max: solution.stats.max,
-      sum: solution.stats.sum
-    }];
+  downloadTests(testCase: TestCase, results: TestResult[]){
+  
+    let data: {
+      [key: string]: number | undefined;
+    }= {
+      ...testCase
+    };
+    
 
-    const csv = Papa.unparse(data);
+    results.forEach( result => {
+      const algorithmKey = result.algorithm.toUpperCase();
+
+      data[`${algorithmKey} MAX`] = result.max;
+      data[`${algorithmKey} SUM`] = result.sum;
+      data[`${algorithmKey} ACTIVEV`] = result.activeV;
+    })
+
+    const csv = Papa.unparse([data]);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
  
     FileSaver.saveAs(blob,  "opti-result_"+new Date().toLocaleDateString()+".csv");
@@ -101,6 +101,28 @@ export class FileService {
       return {places: places, vehicles: jsonContent.vehicles.map(v => new Vehicle(v.capacity))}
     }) )
   }
+}
+
+export interface TestResult{
+  algorithm: string,
+  sum: number,
+  max: number,
+  activeV: number
+}
+
+export interface TestCase{
+  cMin: number,
+  cMax: number,
+  
+  vMin: number,
+  vMax: number,
+ 
+  
+  cSum: number,
+  vSum: number,
+
+  cN: number,
+  vN: number,
 }
 
 
