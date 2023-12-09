@@ -9,7 +9,7 @@ import { TaskService } from './services/task.service';
 import { GMapsService } from './services/g-maps.service';
 import { v4 as uuidv4 } from 'uuid';
 import { Solution } from './models/Solution';
-import { FileService } from './services/file.service';
+import { FileService, TestCase, TestResult } from './services/file.service';
 import { MapRoute } from './models/MapRoute';
 import { GoogleMap } from '@angular/google-maps';
 
@@ -265,11 +265,44 @@ export class AppComponent implements OnInit {
   downloadInput(){
     this.fileService.downloadInput(this.placeMarkers, this.vehicles);
   }
-  downloadResult(){
-    if(!this.lastSolution){
-      return;
+
+  startTests(){
+    let placesD = this.placeMarkers.slice(1).map(p => p.demand);
+    let vehiclesC = this.vehicles.map(p => p.capacity);
+
+    let testCase: TestCase = {
+      cMin: placesD.reduce((a, v) => Math.min(a,v)),
+      cMax: placesD.reduce((a, v) => Math.max(a,v)),
+      vMin: vehiclesC.reduce((a, v) => Math.min(a,v)),
+      vMax: vehiclesC.reduce((a, v) => Math.max(a,v)),
+      cSum: placesD.reduce((a,v) => a + v),
+      vSum: vehiclesC.reduce((a,v) => a + v),
+      cN: placesD.length,
+      vN: vehiclesC.length,
     }
-    this.fileService.downloadResult(this.lastSolution);
+
+    let observables: Observable<Solution>[] = [];
+
+    for (const algorithm of this.algorithms) {
+      observables.push(
+        this.taskService.getSolution(this.placeMarkers, this.vehicles, algorithm)
+      )
+    }
+
+    forkJoin(observables).subscribe((solutions: Solution[]) => {
+      let results: TestResult[] = [];
+
+      for (const solution of solutions) {
+        results.push({
+          algorithm: solution.algorithm,
+          sum: solution.stats.sum,
+          max: solution.stats.max,
+          activeV: solution.activeV
+        })
+      }
+      
+      this.fileService.downloadTests(testCase, results);
+    })
   }
 }
 
