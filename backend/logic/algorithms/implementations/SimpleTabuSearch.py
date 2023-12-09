@@ -79,7 +79,8 @@ def is_in_tabu(move: Move, tabu_list, solution):
 class STabuSearch(Algorithm):
     USE_LIMITING_TABU = False
     MAX_TABU_SIZE = 0 #^
-    TS_iter = 100
+    TS_iter = 50
+    ITER_ADDITION = 10
     CAP_OVERLOAD_PENALTY = 5
     use_capacity = True
     USE_LIMITING_NEIGHBOURHOOD = True
@@ -179,20 +180,20 @@ class STabuSearch(Algorithm):
                 s_best = best_candidate_sol
                 s_best_fit = best_candidate_fit
                 self.feasible = self.check_feasibility(s_best)
-                self.increasing_counter = 10
+                self.increasing_counter = self.ITER_ADDITION
             elif self.increasing_counter > 0:
                 self.increasing_counter -= 1
             ref = best_candidate_sol
 
             if self.USE_LIMITING_TABU and len(self.tabu_list) > self.MAX_TABU_SIZE:
-                for i in range(self.MAX_TABU_SIZE // 10):
+                for i in range(self.MAX_TABU_SIZE // self.ITER_ADDITION):
                     self.tabu_list.pop()
             i += 1
         return s_best
 
     def stopping_condition(self, i):
         if i > self.TS_iter and self.increasing_counter > 0:
-            self.TS_iter += 10
+            self.TS_iter += self.ITER_ADDITION
         return i > self.TS_iter
 
     def neighbourhood_search(self, routes: list) -> list[Move]:
@@ -204,20 +205,7 @@ class STabuSearch(Algorithm):
                 continue
             solutions = self.two_lists_moves(routes, route1, route2)
             all_solutions += solutions
-        # for ri, route in enumerate(routes):
-        #     solutions = self.one_list_moves(route, ri)
-        #     all_solutions += solutions
         return all_solutions
-
-    # def one_list_moves(self, route: list, ri: int):
-    #     moves = []
-    #     for i1, v1 in enumerate(route):
-    #         for i2, v2 in enumerate(route):
-    #             if i1 == i2:
-    #                 continue
-    #             sol = SwapMove(ri, ri, v1, v2, i1, i2)
-    #             moves.append(sol)
-    #     return moves
 
     def two_lists_moves(self, routes: list, r1: int, r2: int) -> list[Move]:
         solutions = []
