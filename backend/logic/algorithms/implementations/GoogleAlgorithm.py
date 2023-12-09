@@ -10,11 +10,13 @@ from logic.models.Vehicle import Vehicle
 from enum import Enum
 
 class GoogleAlgoType(Enum):
-    GUIDED_LOCAL_SEARCH = 0
-    SIMULATED_ANNEALING = 1
+    NOT_INITIALIZED = 0
+    GUIDED_LOCAL_SEARCH = 1
+    SIMULATED_ANNEALING = 2
+    CW_ONLY = 3
 
 class GoogleAlgorithm(Algorithm):
-    def __init__(self, algorithm=GoogleAlgoType.GUIDED_LOCAL_SEARCH):
+    def __init__(self, algorithm=GoogleAlgoType.NOT_INITIALIZED):
         super().__init__()
         self.algorithm_type = algorithm
 
@@ -64,7 +66,9 @@ class GoogleAlgorithm(Algorithm):
 
 
         # Setting first solution heuristic.
+
         search_parameters = self.setting_first_solution_heuristic()
+        routing.CloseModelWithParameters(search_parameters)
 
         # Solve the problem.
         google_solution = routing.SolveWithParameters(search_parameters)
@@ -99,18 +103,18 @@ class GoogleAlgorithm(Algorithm):
     def setting_first_solution_heuristic(self):
         search_parameters = pywrapcp.DefaultRoutingSearchParameters()
         search_parameters.first_solution_strategy = (
-            routing_enums_pb2.FirstSolutionStrategy.SAVINGS
+            routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC
         )
 
         if self.algorithm_type == GoogleAlgoType.SIMULATED_ANNEALING:
-            search_parameters.local_search_metaheuristic = (
-                routing_enums_pb2.LocalSearchMetaheuristic.SIMULATED_ANNEALING
-            )
+            search_parameters.local_search_metaheuristic = (routing_enums_pb2.LocalSearchMetaheuristic.SIMULATED_ANNEALING)
+        elif self.algorithm_type == GoogleAlgoType.GUIDED_LOCAL_SEARCH:
+            search_parameters.local_search_metaheuristic = (routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH)
+        elif self.algorithm_type == GoogleAlgoType.CW_ONLY:
+            search_parameters.first_solution_strategy = routing_enums_pb2.FirstSolutionStrategy.SAVINGS
+            # no local_search_metaheuristic
         else:
-            search_parameters.local_search_metaheuristic = (
-                routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH
-            )
-
+            raise Exception
 
         search_parameters.time_limit.FromSeconds(1)
         return search_parameters
