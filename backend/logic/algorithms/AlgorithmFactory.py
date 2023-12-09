@@ -12,12 +12,14 @@ class AlgorithmFactory:
                 return GreedyAlgorithm()
             case AlgorithmType.TABU:
                 return STabuSearch()
-            case AlgorithmType.AM_TABU:
-                return AdaptiveMemoryTabuSearch()
+            # case AlgorithmType.AM_TABU:
+            #     return AdaptiveMemoryTabuSearch()
             case AlgorithmType.GOOGLE_GLS:
                 return GoogleAlgorithm(GoogleAlgoType.GUIDED_LOCAL_SEARCH)
             case AlgorithmType.GOOGLE_SA:
                 return GoogleAlgorithm(GoogleAlgoType.SIMULATED_ANNEALING)
+            case AlgorithmType.GOOGLE_CW:
+                return GoogleAlgorithm(GoogleAlgoType.CW_ONLY)
             case AlgorithmType.GOOGLE_TABU:
                 return GoogleAlgorithm(GoogleAlgoType.GOOGLE_TABU)
             case _:
