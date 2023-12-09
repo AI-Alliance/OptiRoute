@@ -12,6 +12,7 @@ from enum import Enum
 class GoogleAlgoType(Enum):
     GUIDED_LOCAL_SEARCH = 0
     SIMULATED_ANNEALING = 1
+    GOOGLE_TABU = 1
 
 class GoogleAlgorithm(Algorithm):
     def __init__(self, algorithm=GoogleAlgoType.GUIDED_LOCAL_SEARCH):
@@ -102,14 +103,24 @@ class GoogleAlgorithm(Algorithm):
             routing_enums_pb2.FirstSolutionStrategy.SAVINGS
         )
 
+
         if self.algorithm_type == GoogleAlgoType.SIMULATED_ANNEALING:
             search_parameters.local_search_metaheuristic = (
                 routing_enums_pb2.LocalSearchMetaheuristic.SIMULATED_ANNEALING
             )
-        else:
+            print("SIMULATED_ANNEALING start")
+        elif self.algorithm_type == GoogleAlgoType.GUIDED_LOCAL_SEARCH:
             search_parameters.local_search_metaheuristic = (
                 routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH
             )
+            print("GUIDED_LOCAL_SEARCH start")
+        elif self.algorithm_type == GoogleAlgoType.GOOGLE_TABU:
+            search_parameters.local_search_metaheuristic = (
+                routing_enums_pb2.LocalSearchMetaheuristic.TABU_SEARCH
+            )
+            print("TABU_SEARCH start")
+        else:
+            raise ValueError("Invalid Type")
 
 
         search_parameters.time_limit.FromSeconds(1)

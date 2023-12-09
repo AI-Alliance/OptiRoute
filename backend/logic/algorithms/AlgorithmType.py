@@ -6,3 +6,4 @@ class AlgorithmType(Enum):
     GREEDY = 3
     GOOGLE_GLS = 4
     GOOGLE_SA = 5
+    GOOGLE_TABU = 6

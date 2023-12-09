@@ -18,5 +18,7 @@ class AlgorithmFactory:
                 return GoogleAlgorithm(GoogleAlgoType.GUIDED_LOCAL_SEARCH)
             case AlgorithmType.GOOGLE_SA:
                 return GoogleAlgorithm(GoogleAlgoType.SIMULATED_ANNEALING)
+            case AlgorithmType.GOOGLE_TABU:
+                return GoogleAlgorithm(GoogleAlgoType.GOOGLE_TABU)
             case _:
                 raise ValueError("Invalid Type")
