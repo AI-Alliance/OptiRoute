@@ -33,15 +33,22 @@ export class FileService {
   downloadResult(solution:Solution){
     let data = [{
       algorithm: solution.algorithm,
-      cN: solution.placesD.length,
-      cSum: solution.placesD.reduce((a,v) => a + v),
+      
       cMin: solution.placesD.reduce((a,v) => Math.min(a, v)),
       cMax: solution.placesD.reduce((a,v) => Math.max(a, v)),
-      vN: solution.vehiclesC.length,
-      vSum: solution.vehiclesC.reduce((a,v) => a + v),
+      
       vMin: solution.vehiclesC.reduce((a,v) => Math.min(a, v)),
       vMax: solution.vehiclesC.reduce((a,v) => Math.max(a, v)),
      
+      
+      cSum: solution.placesD.reduce((a,v) => a + v),
+      vSum: solution.vehiclesC.reduce((a,v) => a + v),
+
+      activeV: solution.activeV,
+
+      cN: solution.placesD.length,
+      vN: solution.vehiclesC.length,
+
       avg: solution.stats.avg,
       max: solution.stats.max,
       sum: solution.stats.sum

@@ -11,6 +11,7 @@ export interface Solution{
         vehicle_id: string
     }[],
     algorithm: string,
+    activeV: number,
     vehiclesC: number[], 
     placesD: number[],
     stats: {max: number, avg: number, sum: number}

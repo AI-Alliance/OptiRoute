@@ -37,6 +37,7 @@ export class TaskService {
         solution.vehiclesC = vehiclesC;
         solution.placesD = placesD;
         solution.algorithm = algorithm;
+        solution.activeV = solution.vehicles.filter(v => v.route.places.length > 2).length;
         solution.stats = {
           max: solution.vehicles.reduce((max, vehicle) => vehicle.route.duration_sum > max ? vehicle.route.duration_sum : max, 0),
           avg: solution.vehicles.reduce((sum, vehicle) => sum + vehicle.route.duration_sum, 0) / solution.vehicles.length,

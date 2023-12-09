@@ -33,7 +33,7 @@ export class AppComponent implements OnInit {
     min: 0,
     max: 0,
     radius: 1000,
-    places: 50
+    places: 20
   }
 
 
@@ -164,7 +164,7 @@ export class AppComponent implements OnInit {
           pM.demand = Math.floor(Math.random() * (this.generator.max - this.generator.min) + this.generator.min);
           pM.placeId = p.place_id ?? '';
           pM.description = p.vicinity ?? '';
-          this.placeMarkers.push(pM);
+          this.addMarker(pM);
         })
         this.generatorLoading = false;
       })
@@ -175,29 +175,35 @@ export class AppComponent implements OnInit {
     if(this.hasDepotMarker() && this.selectedType == PlaceType.DEPOT){
       return;
     }
-    this.addMarker(event.latLng, this.selectedType);
+
+    
+    this.createMarkerFromNearest(event.latLng, this.selectedType);
 
     if(this.selectedType == PlaceType.DEPOT){
       this.selectedType = PlaceType.CLIENT;
     }
   }
 
-  addMarker(latLng: google.maps.LatLng, type: PlaceType){
-    let m = new PlaceMarker(latLng, type);
-     
-    this.gMapsService.getGeoInfo(m.latLng).subscribe((r) => {
-      m.placeId = r.results[0].place_id;
-      m.latLng = r.results[0].geometry.location;
-      m.description = r.results[0].formatted_address;
-    })
-
-    if(type == PlaceType.DEPOT){
-      this.placeMarkers.unshift(m);
-      
-    } else {
-      this.placeMarkers.push(m);
+  addMarker(newMarker: PlaceMarker){
+    if(this.placeMarkers.findIndex(p => p.placeId == newMarker.placeId) < 0){
+      if(newMarker.type == PlaceType.DEPOT){
+        this.placeMarkers.unshift(newMarker);
+        
+      } else {
+        this.placeMarkers.push(newMarker);
+      }
     }
+  }
 
+  createMarkerFromNearest(latLng: google.maps.LatLng, type: PlaceType){
+    this.gMapsService.getGeoInfo(latLng).subscribe((r) => {
+      let newMarker = new PlaceMarker(latLng, type);
+      newMarker.placeId = r.results[0].place_id;
+      newMarker.latLng = r.results[0].geometry.location;
+      newMarker.description = r.results[0].formatted_address;
+      
+      this.addMarker(newMarker);
+    })
   }
 
   
