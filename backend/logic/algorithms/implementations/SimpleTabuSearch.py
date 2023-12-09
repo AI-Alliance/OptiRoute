@@ -161,6 +161,7 @@ class STabuSearch(Algorithm):
         while not self.stopping_condition(i): # iterations
             s_neighborhood = self.neighbourhood_search(ref)
             if len(s_neighborhood) == 0:
+                self.feasible = self.check_feasibility(s_best)
                 return s_best
             best_candidate_moves = s_neighborhood[0] # best from neighbourhood
             best_candidate_sol = best_candidate_moves.make_move(ref)
@@ -196,25 +197,27 @@ class STabuSearch(Algorithm):
 
     def neighbourhood_search(self, routes: list) -> list[Move]:
         all_solutions = []
+        if len(routes) < 2:
+            return []
         for route1, route2 in IterPairs(len(routes)):
             if route1 == route2:
                 continue
             solutions = self.two_lists_moves(routes, route1, route2)
             all_solutions += solutions
-        for ri, route in enumerate(routes):
-            solutions = self.one_list_moves(route, ri)
-            all_solutions += solutions
+        # for ri, route in enumerate(routes):
+        #     solutions = self.one_list_moves(route, ri)
+        #     all_solutions += solutions
         return all_solutions
 
-    def one_list_moves(self, route: list, ri: int):
-        moves = []
-        for i1, v1 in enumerate(route):
-            for i2, v2 in enumerate(route):
-                if i1 == i2:
-                    continue
-                sol = SwapMove(ri, ri, v1, v2, i1, i2)
-                moves.append(sol)
-        return moves
+    # def one_list_moves(self, route: list, ri: int):
+    #     moves = []
+    #     for i1, v1 in enumerate(route):
+    #         for i2, v2 in enumerate(route):
+    #             if i1 == i2:
+    #                 continue
+    #             sol = SwapMove(ri, ri, v1, v2, i1, i2)
+    #             moves.append(sol)
+    #     return moves
 
     def two_lists_moves(self, routes: list, r1: int, r2: int) -> list[Move]:
         solutions = []
