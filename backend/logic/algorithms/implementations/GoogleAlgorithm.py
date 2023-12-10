@@ -120,7 +120,7 @@ class GoogleAlgorithm(Algorithm):
         else:
             raise Exception
 
-        search_parameters.time_limit.FromSeconds(1)
+        search_parameters.time_limit.FromSeconds(10)
         return search_parameters
 
     def add_distance_constraint(self, routing, transit_callback_index):
