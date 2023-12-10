@@ -40,7 +40,7 @@ export class AppComponent implements OnInit {
   algorithms: string[] = [];
 
   selectedAlgorithm: string = '';
-  algorithmParams: string = '';
+  algorithmParams: string = '1';
 
   taskLoading: boolean = false;
   
