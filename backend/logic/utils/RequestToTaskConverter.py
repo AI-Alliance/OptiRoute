@@ -15,7 +15,7 @@ class RequestToTaskConverter:
         rows_list: list = request_dict['rows']
         places_dict_list: list = request_dict['places']
         vehicles_dict_list: list = request_dict['vehicles']
-
+        seconds_terminate: int = int(request_dict['algorithm_params'])
         algorithm_type = AlgorithmType[request_dict.get('algorithm_type', AlgorithmType.GREEDY.name)]
 
 
@@ -25,6 +25,7 @@ class RequestToTaskConverter:
 
         task = TaskBuilder() \
             .set_id(task_id)\
+            .set_seconds_terminate(seconds_terminate) \
             .set_distance_matrix(distance_matrix) \
             .set_places(places)\
             .set_vehicles(vehicles)\

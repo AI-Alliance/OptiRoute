@@ -18,10 +18,10 @@ class GoogleAlgoType(Enum):
 
 
 class GoogleAlgorithm(Algorithm):
-    def __init__(self, algorithm=GoogleAlgoType.NOT_INITIALIZED):
+    def __init__(self, algorithm=GoogleAlgoType.NOT_INITIALIZED, seconds_terminate=1):
         super().__init__()
         self.algorithm_type = algorithm
-
+        self.seconds_terminate = seconds_terminate
     def solve(self, task: Task) -> Solution:
         """Entry point of the program."""
         # Instantiate the data problem.
@@ -120,7 +120,7 @@ class GoogleAlgorithm(Algorithm):
         else:
             raise Exception
 
-        search_parameters.time_limit.FromSeconds(10)
+        search_parameters.time_limit.FromSeconds(self.seconds_terminate)
         return search_parameters
 
     def add_distance_constraint(self, routing, transit_callback_index):

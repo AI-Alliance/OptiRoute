@@ -10,11 +10,15 @@ class Task:
         self._places: list = []
         self._vehicles: list = []
         self._algorithm_type: AlgorithmType = None
+        self._seconds_terminate :int =1
         print("Task created!")
 
     @property
     def id(self):
         return self._id
+    @property
+    def seconds_terminate(self):
+        return self._seconds_terminate
     @property
     def algorithm_type(self):
         return self._algorithm_type
@@ -43,7 +47,9 @@ class TaskBuilder:
     def set_id(self, id: str):
         self.task._id = id
         return self
-
+    def set_seconds_terminate(self, seconds_terminate:int):
+        self.task._seconds_terminate = seconds_terminate
+        return self
     def set_distance_matrix(self, distance_matrix):
         self.task._distance_matrix = distance_matrix
         return self
