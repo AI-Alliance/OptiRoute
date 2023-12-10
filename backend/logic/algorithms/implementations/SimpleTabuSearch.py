@@ -198,14 +198,27 @@ class STabuSearch(Algorithm):
 
     def neighbourhood_search(self, routes: list) -> list[Move]:
         all_solutions = []
+        for ri, r in enumerate(routes):
+            all_solutions += self.one_lists_moves(r, ri)
         if len(routes) < 2:
-            return []
+            return all_solutions
         for route1, route2 in IterPairs(len(routes)):
             if route1 == route2:
                 continue
             solutions = self.two_lists_moves(routes, route1, route2)
             all_solutions += solutions
         return all_solutions
+
+
+    def one_lists_moves(self, route: list, ri: int) -> list[Move]:
+        solutions = []
+        for i1, v1 in enumerate(route):
+            for i2, v2 in enumerate(route):
+                if i2 <= i1:
+                    continue
+                sol = SwapMove(ri, ri, v1, v2, i1, i2)
+                solutions.append(sol)
+        return solutions
 
     def two_lists_moves(self, routes: list, r1: int, r2: int) -> list[Move]:
         solutions = []
