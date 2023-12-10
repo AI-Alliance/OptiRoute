@@ -19,7 +19,7 @@ class TaskService(Service):
 
     def add(self, task: Task) -> None:
         self.tasks.append(task)
-        algorithm = AlgorithmFactory.create(task.algorithm_type)
+        algorithm = AlgorithmFactory.create(task.algorithm_type, task.seconds_terminate)
         self.algorithm_manager.change_algorithm(algorithm)
         solution: Solution = self.algorithm_manager.solve_task(task)
         self.solution_service.add(solution)
