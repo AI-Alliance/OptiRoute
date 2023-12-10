@@ -40,6 +40,7 @@ export class AppComponent implements OnInit {
   algorithms: string[] = [];
 
   selectedAlgorithm: string = '';
+  algorithmParams: string = '';
 
   taskLoading: boolean = false;
   
@@ -245,7 +246,7 @@ export class AppComponent implements OnInit {
   getSolution(){
     this.taskLoading = true;
 
-    this.taskService.getSolution(this.placeMarkers, this.vehicles, this.selectedAlgorithm).subscribe(solution => {
+    this.taskService.getSolution(this.placeMarkers, this.vehicles, this.selectedAlgorithm, this.algorithmParams).subscribe(solution => {
       this.showSolution(solution);
       this.lastSolution = solution;
       this.taskLoading = false;
@@ -285,7 +286,7 @@ export class AppComponent implements OnInit {
 
     for (const algorithm of this.algorithms) {
       observables.push(
-        this.taskService.getSolution(this.placeMarkers, this.vehicles, algorithm)
+        this.taskService.getSolution(this.placeMarkers, this.vehicles, algorithm, this.algorithmParams)
       )
     }
 

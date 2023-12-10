@@ -100,6 +100,12 @@
       max: {{lastSolution?.stats?.max}}
       sum: {{lastSolution?.stats?.sum}}
     </div>
+    <div class="row form-group">
+      <label class="col col-form-label">Algorithm parameters:</label>
+      <div class="col">
+        <input class="form-control" type="text" [(ngModel)]="algorithmParams">
+      </div>
+    </div>
     
     
     <div class="w-100 d-flex justify-content-between mt-5">

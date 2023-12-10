@@ -21,11 +21,11 @@ export class TaskService {
     return this.httpClient.get<{algorithms: string[]}>(environment.backendAddress + '/algorithms').pipe(map(response => response.algorithms));
   }
 
-  getSolution(placeMarkers: PlaceMarker[], vehicles: Vehicle[], algorithm: string): Observable<Solution>{
+  getSolution(placeMarkers: PlaceMarker[], vehicles: Vehicle[], algorithm: string, algorithmParams: string): Observable<Solution>{
     return this.gMapsService.getMatrix(placeMarkers).pipe(
       switchMap((matrix) => {
         let taskId = uuidv4();
-        return this.sendTask(taskId, vehicles, placeMarkers, algorithm, matrix).pipe(
+        return this.sendTask(taskId, vehicles, placeMarkers, algorithm, algorithmParams, matrix).pipe(
           switchMap( () => {
             return this.pollSolution(taskId);
           })
@@ -56,7 +56,7 @@ export class TaskService {
     })
   }
 
-  private sendTask(taskId:string, vehicles: Vehicle[], places: PlaceMarker[], algorithm: string, matrix: number[][]){
+  private sendTask(taskId:string, vehicles: Vehicle[], places: PlaceMarker[], algorithm: string, algorithmParams: string, matrix: number[][]){
     let placesToSend = [];
 
     for(let i = 0; i < places.length; i++){
@@ -73,6 +73,7 @@ export class TaskService {
       places: placesToSend,
       vehicles: vehiclesToSend,
       algorithm_type: algorithm,
+      algorithm_params: algorithmParams,
       rows: matrixToSend
     });
   }
